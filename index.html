@@ -3,279 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OMEGA Bingo - Panel Oficial</title>
+    <title>Bingo Virtual WhatsApp | Inicio</title>
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
-<body class="min-h-screen">
+<body>
 
-    <div id="closedStoreOverlay" class="closed-overlay select-none">
-        <div id="adminSecretLock" class="absolute top-5 right-5 text-gray-300 cursor-pointer p-2 opacity-30 hover:opacity-100 z-50">
-            <i class="fas fa-lock fa-lg"></i>
+    <header>
+        <div class="logo">BINGO WHATSAPP</div>
+        <div class="mobile-menu-icon" id="menu-toggle">
+            <i class="fas fa-bars"></i>
         </div>
-
-        <div class="relative w-full max-w-lg h-full flex flex-col justify-center items-center">
-            <div class="absolute top-10 text-center w-full px-4">
-                <h2 class="text-2xl font-black text-purple-800 mb-1 uppercase tracking-wide">¡Aún estamos cerrados!</h2>
-                <p class="text-gray-500 text-sm font-bold mb-2">Reservas a partir de las 8:00 AM</p>
-                <div class="inline-block bg-yellow-400 text-purple-900 font-black px-4 py-1 rounded-full text-sm shadow-md">
-                    SCORE: <span id="gameScore">0</span>
-                </div>
-            </div>
-
-            <div class="relative w-full h-[300px] flex items-center justify-center bg-white overflow-hidden" id="gameContainer" onclick="jumpDino()">
-                <canvas id="dinoCanvas"></canvas>
-                <div id="gameMessage" class="absolute inset-0 flex flex-col items-center justify-center bg-white/80 z-10">
-                    <p class="text-purple-800 font-black text-xl mb-2" id="msgTitle">¡JUEGA MIENTRAS ESPERAS!</p>
-                    <p class="text-gray-600 text-sm mb-4">Toca la pantalla para saltar</p>
-                    <button onclick="startGame()" class="bg-purple-600 text-white font-bold py-2 px-6 rounded-full shadow-lg hover:scale-105 transition-transform animate-pulse">
-                        EMPEZAR A CORRER 🚀
-                    </button>
-                </div>
-            </div>
-
-            <p class="mt-8 text-gray-400 text-xs text-center px-6">
-                Próximo Bingo para el 8/12/25 - 7:00 PM<br>
-                ¡Partidas EN VIVO por Whatsapp!
-            </p>
-            <div class="mt-4 border-t border-gray-100 pt-4 w-1/2 mx-auto text-center">
-                <p class="text-[10px] text-gray-300 font-bold tracking-widest">© OMEGA BINGO SYSTEM</p>
-            </div>
+        <nav class="nav-links" id="nav-menu">
+            <a href="#">Inicio</a>
+            <a href="#">Salas</a>
+            <a href="#">Ganadores</a>
+            <a href="#">Reglas</a>
+        </nav>
+        <div class="header-buttons">
+            <a href="https://wa.me/TU_NUMERO" class="btn-login">Contacto</a>
         </div>
+    </header>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>¡Juega al Bingo desde tu Móvil!</h1>
+            <p>Únete a nuestros grupos de WhatsApp y gana premios diarios.</p>
+            <a href="https://chat.whatsapp.com/TU_ENLACE_GRUPO_PRINCIPAL" class="cta-button">
+                UNIRSE AL GRUPO <i class="fab fa-whatsapp"></i>
+            </a>
+        </div>
+    </section>
+
+    <div class="payment-strip">
+        <i class="fab fa-cc-visa"></i>
+        <i class="fab fa-cc-mastercard"></i>
+        <i class="fas fa-mobile-alt"></i> <i class="fab fa-paypal"></i>
     </div>
 
-    <div id="adminPanel" class="admin-panel hidden">
-        <div class="max-w-4xl mx-auto">
-            <div class="flex justify-between items-center mb-8 bg-white p-4 rounded-xl shadow-md">
-                <h1 class="text-2xl font-extrabold text-purple-800">🔐 Panel de Control OMEGA</h1>
-                <button onclick="adminLogout()" class="px-4 py-2 bg-red-500 text-white font-bold rounded hover:bg-red-600">Salir</button>
-            </div>
+    <section class="jackpot-section">
+        <h2>¡El mayor Bote en WhatsApp!</h2>
+        <div class="jackpot-amount">1.500€</div>
 
-            <div id="adminLogin" class="max-w-md mx-auto bg-white p-8 rounded-xl shadow-lg">
-                <h2 class="text-xl font-bold mb-4 text-gray-700">Iniciar Sesión Admin</h2>
-                <input type="email" id="adminEmail" placeholder="Correo" class="w-full p-3 border rounded mb-3">
-                <input type="password" id="adminPassword" placeholder="Contraseña" class="w-full p-3 border rounded mb-4">
-                <button onclick="adminLogin()" class="w-full py-3 bg-purple-600 text-white font-bold rounded hover:bg-purple-700">ENTRAR</button>
-                <p id="adminLoginError" class="text-red-500 text-sm mt-3 hidden"></p>
-            </div>
-
-            <div id="adminDashboard" class="hidden space-y-8">
-                <div class="bg-white p-6 rounded-xl shadow-lg border-t-8 border-purple-600 flex justify-between items-center">
-                    <div>
-                        <h2 class="text-xl font-bold text-gray-800">🏪 Estado de la Tienda</h2>
-                        <p id="storeStatusText" class="text-sm text-gray-500">Cargando estado...</p>
-                    </div>
-                    <button id="toggleStoreBtn" onclick="toggleStoreStatus()" class="px-6 py-3 rounded-lg font-black text-white transition-colors shadow-lg">
-                        CARGANDO...
-                    </button>
-                </div>
-
-                <div class="bg-white p-6 rounded-xl shadow-lg border-t-8 border-yellow-400">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-                        ⚠️ Pagos Pendientes por Confirmar (<span id="pendingCount">0</span>)
-                    </h2>
-                    <div id="pendingCardsList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-                </div>
-
-                <div class="bg-white p-6 rounded-xl shadow-lg border-t-8 border-green-500">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-2xl font-bold text-gray-800">✅ Historial de Ventas (<span id="soldCount">0</span>)</h2>
-                        <button onclick="downloadSoldList()" class="bg-blue-600 text-white px-4 py-2 rounded font-bold hover:bg-blue-700">Descargar CSV</button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full text-sm text-left text-gray-600">
-                            <thead class="bg-gray-100 uppercase font-bold">
-                                <tr><th class="p-3">Nombre</th><th class="p-3">Tlf</th><th class="p-3">Tablas</th><th class="p-3">Acción</th></tr>
-                            </thead>
-                            <tbody id="soldPlayersTableBody" class="divide-y divide-gray-200"></tbody>
-                        </table>
+        <div class="games-grid">
+            <div class="game-card">
+                <div class="card-header bg-1">
+                    <div class="jackpot-bubble">
+                        <span>BOTE</span>
+                        <span>500€</span>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="clientContent">
-        <div class="max-w-xl mx-auto p-4 pb-20">
-            <div class="bg-yellow-400 p-4 rounded-t-xl text-center shadow-lg border-b-4 border-purple-800 mb-4">
-                <p class="font-black text-xl text-gray-900">¡OMEGA BINGO MAYOR!</p>
-                <div class="mt-2 p-2 bg-purple-800 rounded-lg">
-                    <p class="text-purple-200 text-xs font-bold uppercase tracking-widest">
-                        Próximo Juego: <span id="bingoDateDisplay">--</span>
-                    </p>
-                    <div id="countdownTimer">--:--:--</div>
+                <div class="card-body">
+                    <h3>SÚPER 90</h3>
+                    <p>Abierto las 24 horas. Cartones desde 1€.</p>
+                    <a href="#" class="play-btn">JUGAR AHORA</a>
                 </div>
             </div>
 
-            <div class="bg-white p-4 rounded-xl shadow-lg text-center mb-6 border border-gray-200">
-                <p class="font-bold text-gray-600">Valor de la Tabla</p>
-                <p class="text-3xl font-black text-green-600">Bs. 300,00</p>
-                <div class="mt-2 flex justify-center gap-4 text-sm">
-                    <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full font-bold">Disponibles: <span id="availableCount">--</span></span>
-                </div>
-            </div>
-
-            <div class="text-center mb-8">
-                <h1 class="omega-title">OMEGA</h1>
-                <p class="omega-subtitle">Sistema de Reserva Online</p>
-            </div>
-
-            <div class="bg-white p-5 rounded-xl shadow-xl mb-8 border-l-4 border-purple-600">
-                <h3 class="font-bold text-gray-800 mb-3 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
-                    Datos Pago Móvil
-                </h3>
-                <div class="space-y-2 text-sm text-gray-600">
-                    <div class="flex justify-between border-b pb-1"><span>Banco:</span> <span class="font-bold text-gray-900 cursor-pointer" onclick="copyToClipboard('0108')">0108 (Provincial) 📋</span></div>
-                    <div class="flex justify-between border-b pb-1"><span>Cédula:</span> <span class="font-bold text-gray-900 cursor-pointer" onclick="copyToClipboard('25822059')">V25822059 📋</span></div>
-                    <div class="flex justify-between"><span>Teléfono:</span> <span class="font-bold text-gray-900 cursor-pointer" onclick="copyToClipboard('04129546751')">04129546751 📋</span></div>
-                </div>
-            </div>
-
-            <button onclick="showCardSelectionModal()" class="w-full py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 font-black text-xl rounded-xl shadow-xl hover:scale-[1.02] transition-transform mb-8 uppercase tracking-wide">
-                Comprar Tablas 🎟️
-            </button>
-
-            <div class="grid gap-4">
-                <div class="bg-white p-5 rounded-xl shadow-md">
-                    <h3 class="font-bold text-gray-700 mb-2">🔍 Consultar por Teléfono</h3>
-                    <div class="flex gap-2">
-                        <input type="tel" id="searchPhoneInput" placeholder="Ej: 0412..." class="w-full p-2 border rounded bg-gray-50">
-                        <button onclick="searchCardByPhone()" class="bg-purple-600 text-white px-4 rounded font-bold">Ver</button>
+            <div class="game-card">
+                <div class="card-header bg-2">
+                    <div class="jackpot-bubble">
+                        <span>BOTE</span>
+                        <span>250€</span>
                     </div>
                 </div>
-                <div class="bg-white p-5 rounded-xl shadow-md">
-                    <h3 class="font-bold text-gray-700 mb-2">🆔 Ver Tabla Individual</h3>
-                    <div class="flex gap-2">
-                        <input type="number" id="cardNumberInput" placeholder="N° Tabla" class="w-full p-2 border rounded bg-gray-50">
-                        <button onclick="searchCard()" class="bg-purple-600 text-white px-4 rounded font-bold">Ver</button>
+                <div class="card-body">
+                    <h3>BINGO RÁPIDO</h3>
+                    <p>Partidas rápidas cada 5 minutos.</p>
+                    <a href="#" class="play-btn">JUGAR AHORA</a>
+                </div>
+            </div>
+
+            <div class="game-card">
+                <div class="card-header bg-3">
+                    <div class="jackpot-bubble">
+                        <span>BOTE</span>
+                        <span>100€</span>
                     </div>
                 </div>
+                <div class="card-body">
+                    <h3>NOCTURNO</h3>
+                    <p>Premios especiales a partir de las 22:00h.</p>
+                    <a href="#" class="play-btn">JUGAR AHORA</a>
+                </div>
             </div>
 
-            <div id="searchResultArea" class="hidden mt-6 bg-white p-4 rounded-xl shadow-xl text-center border-2 border-purple-100">
-                <h3 id="resultTitle" class="font-bold text-lg text-purple-800 mb-2"></h3>
-                <div id="resultContent" class="flex justify-center flex-wrap gap-4"></div>
-                <p id="resultStatus" class="text-sm font-bold mt-2"></p>
-            </div>
-
-            <div class="mt-12 text-center">
-                <img src="logo-omega-bingo.png" id="footer-logo" class="mx-auto w-24 rounded-full shadow-lg bg-white p-1" alt="Logo">
-                <h3 class="text-xl font-bold text-white mb-4">Síguenos en Redes Sociales</h3>
-                <div class="flex justify-center space-x-6 mb-6">
-                    <a href="https://wa.me/584226431972" target="_blank" class="text-white hover:text-green-400 transition-colors" title="WhatsApp"><i class="fab fa-whatsapp fa-3x" style="color:#25D366;"></i></a>
-                    <a href="https://www.facebook.com/OmegabingoAA/" target="_blank" class="text-white hover:text-blue-600 transition-colors" title="Facebook"><i class="fab fa-facebook fa-3x"></i></a>
-                    <a href="https://www.instagram.com/omega_bingo?igsh=MTY4czZ0NDltZ2gxZA==" target="_blank" class="text-white hover:text-pink-600 transition-colors" title="Instagram"><i class="fab fa-instagram fa-3x"></i></a>
+             <div class="game-card">
+                <div class="card-header bg-4">
+                    <div class="jackpot-bubble">
+                        <span>BOTE</span>
+                        <span>50€</span>
+                    </div>
                 </div>
-
-                <div class="flex justify-center space-x-4 mb-6 text-sm">
-                    <button onclick="showLegalModal('terms')" class="text-yellow-300 font-bold hover:underline">Términos y Condiciones</button>
-                    <span class="text-purple-300">|</span>
-                    <button onclick="showLegalModal('privacy')" class="text-yellow-300 font-bold hover:underline">Política de Privacidad</button>
+                <div class="card-body">
+                    <h3>LOW COST</h3>
+                    <p>Cartones económicos desde 0,50 cts.</p>
+                    <a href="#" class="play-btn">JUGAR AHORA</a>
                 </div>
-
-                <p class="text-xs text-purple-200 mt-4">© OMEGA Bingo / Masson 2025. Todos los derechos reservados</p>
-                <img src="logo-masson-bingo.png" id="footer-logo-masson" class="h-auto w-16 inline-block" alt="logo"> 
             </div>
         </div>
-    </div>
+    </section>
 
-    <div id="cardSelectionModal" class="modal">
-        <div class="modal-content">
-            <div class="flex justify-between items-center mb-4 border-b pb-2">
-                <h3 class="text-xl font-bold text-gray-800">Selecciona tus Tablas</h3>
-                <button onclick="hideCardSelectionModal()" class="text-2xl text-gray-500">&times;</button>
-            </div>
-            <div class="flex justify-between text-[10px] font-bold text-gray-500 mb-4 px-2">
-                <span class="flex items-center"><div class="w-3 h-3 bg-purple-700 rounded-full mr-1"></div> Libre</span>
-                <span class="flex items-center"><div class="w-3 h-3 bg-yellow-400 rounded-full mr-1"></div> Tuya</span>
-                <span class="flex items-center"><div class="w-3 h-3 bg-orange-500 rounded-full mr-1"></div> Ocupada</span>
-                <span class="flex items-center"><div class="w-3 h-3 bg-green-600 rounded-full mr-1"></div> Vendida</span>
-            </div>
-            <div id="cardListContainer" class="grid grid-cols-6 sm:grid-cols-8 gap-2 max-h-[60vh] overflow-y-auto p-1"></div>
-            <div class="mt-4 border-t pt-4">
-                <div class="flex justify-between items-center mb-3">
-                    <span class="text-gray-600 font-bold">Total a Pagar:</span>
-                    <span id="totalCostDisplay" class="text-2xl font-black text-green-600">Bs. 0,00</span>
-                </div>
-                <button onclick="preparePayment()" class="w-full py-3 bg-purple-600 text-white font-bold rounded-lg shadow-lg hover:bg-purple-700 transition">
-                    CONTINUAR A PAGO
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div id="cardPreviewModal" class="modal">
-        <div class="modal-content text-center">
-            <h3 class="text-xl font-bold text-gray-800 mb-2">Tabla N° <span id="previewNum" class="text-purple-600"></span></h3>
-            <div id="previewImgContainer" class="flex justify-center mb-4 p-2 bg-gray-100 rounded-lg"></div>
-            <p id="previewStatusText" class="font-bold mb-4"></p>
-            <div class="flex gap-3 justify-center">
-                <button id="btnPreviewAction" class="flex-1 py-2 bg-green-500 text-white font-bold rounded-lg shadow">LO QUIERO</button>
-                <button onclick="closePreview()" class="flex-1 py-2 bg-gray-300 text-gray-700 font-bold rounded-lg">Cerrar</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="paymentProcessModal" class="modal">
-        <div class="modal-content">
-            <div class="flex justify-between items-center mb-2">
-                <h3 class="text-lg font-bold text-purple-800">Confirmar Pago</h3>
-                <button onclick="hidePaymentModal()" class="text-2xl">&times;</button>
-            </div>
-            
-            <div class="bg-yellow-50 text-yellow-800 p-2 rounded text-center text-sm font-bold mb-4 border border-yellow-200">
-                ⏳ Tienes <span id="paymentTimer" class="text-red-600 text-lg">05:00</span> para enviar el capture.
-            </div>
-
-            <div class="space-y-3 mb-4">
-                <div class="flex justify-between text-sm border-b border-dashed pb-1">
-                    <span>Tablas:</span> <span id="payCardsList" class="font-bold text-purple-700"></span>
-                </div>
-                <div class="flex justify-between text-sm border-b border-dashed pb-1">
-                    <span>Total:</span> <span id="payTotal" class="font-bold text-green-600 text-lg"></span>
+    <section class="promo-section">
+        <h2>Promociones y Grandes Premios</h2>
+        <div class="carousel-container">
+            <div class="carousel-item">
+                <img src="https://via.placeholder.com/300x150/4b0082/ffffff?text=Bono+Bienvenida" class="carousel-img" alt="Promo 1">
+                <div class="carousel-text">
+                    <h4>Bono de Bienvenida</h4>
+                    <p>Regalo en tu primera compra.</p>
                 </div>
             </div>
-
-            <form id="paymentForm" onsubmit="event.preventDefault(); submitPayment();" class="space-y-3">
-                <input type="text" id="payName" placeholder="Nombre y Apellido" class="w-full p-3 border rounded bg-gray-50" required>
-                <input type="tel" id="payPhone" placeholder="Teléfono (WhatsApp)" class="w-full p-3 border rounded bg-gray-50" required>
-                <input type="number" id="payRef" placeholder="Últimos 4 dígitos Referencia" class="w-full p-3 border rounded bg-gray-50" required>
-                
-                <div class="border-2 border-dashed border-purple-300 rounded-lg p-4 text-center bg-purple-50 cursor-pointer relative">
-                    <input type="file" id="payFile" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required>
-                    <p class="text-purple-600 font-bold text-sm">📸 Toca aquí para subir CAPTURE</p>
-                    <p id="fileNameDisplay" class="text-xs text-gray-500 mt-1"></p>
+            <div class="carousel-item">
+                <img src="https://via.placeholder.com/300x150/e91e63/ffffff?text=Sorteo+Viernes" class="carousel-img" alt="Promo 2">
+                <div class="carousel-text">
+                    <h4>Sorteo Semanal</h4>
+                    <p>Participa por una cesta especial.</p>
                 </div>
-
-                <button type="submit" class="w-full py-3 bg-green-600 text-white font-bold rounded-lg shadow-lg hover:bg-green-700 transition">
-                    ENVIAR COMPROBANTE 🚀
-                </button>
-            </form>
-            <p id="uploadStatus" class="text-center text-sm mt-2 font-bold hidden"></p>
-        </div>
-    </div>
-
-    <div id="legalModal" class="modal">
-        <div class="modal-legal-content">
-            <div class="flex justify-between items-center mb-4 border-b pb-2">
-                <h3 id="legalModalTitle" class="text-xl font-bold text-gray-800"></h3>
-                <button onclick="hideLegalModal()" class="text-2xl text-gray-500">&times;</button>
             </div>
-            <div id="legalModalBody" class="modal-legal-body text-sm text-gray-700"></div>
+            <div class="carousel-item">
+                <img src="https://via.placeholder.com/300x150/00bcd4/ffffff?text=Amigo+Trae+Amigo" class="carousel-img" alt="Promo 3">
+                <div class="carousel-text">
+                    <h4>Invita y Gana</h4>
+                    <p>Cartones gratis por traer amigos.</p>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
 
-    <script src="game.js"></script>
-    <script src="app.js"></script>
+    <section class="mechanics-section">
+        <h2 class="section-title">¿Cómo jugar?</h2>
+        <div class="mechanics-grid">
+            <div><i class="fas fa-mobile-alt mech-icon"></i><h4>1. Entra al Grupo</h4></div>
+            <div><i class="fas fa-money-bill-wave mech-icon"></i><h4>2. Compra Cartones</h4></div>
+            <div><i class="fas fa-ticket-alt mech-icon"></i><h4>3. Recibe tus Cartones</h4></div>
+            <div><i class="fas fa-trophy mech-icon"></i><h4>4. ¡Canta Bingo!</h4></div>
+        </div>
+    </section>
+
+    <section class="info-text">
+        <h3>Tu Bingo de confianza en WhatsApp</h3>
+        <p>Disfruta de la emoción del bingo tradicional desde tu casa. Pagos inmediatos por Bizum y soporte 24/7.</p>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 Bingo Virtual. Juego responsable +18.</p>
+        <div class="social-icons">
+            <i class="fab fa-whatsapp"></i>
+            <i class="fab fa-instagram"></i>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
 </body>
 </html>
