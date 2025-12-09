@@ -1,123 +1,104 @@
-/*
-    ======================================
-    Estilos Esenciales y Overlays
-    ======================================
-*/
 body {
-    /* Asegura que Poppins se use correctamente */
     font-family: 'Poppins', sans-serif;
-    /* Evita el scroll horizontal en diseños responsivos */
-    overflow-x: hidden; 
+    background: linear-gradient(135deg, #2e004f 0%, #6b00b6 100%);
+    background-size: 400% 400%;
+    animation: gradient-flow 15s ease infinite;
+    overflow-x: hidden;
 }
 
-/* Modal Styling */
-.modal {
-    display: none; 
-    position: fixed; 
-    z-index: 1000; 
-    left: 0;
-    top: 0;
-    width: 100%; 
-    height: 100%; 
-    overflow: auto; 
-    background-color: rgba(0,0,0,0.6); 
-    padding-top: 50px;
+@keyframes gradient-flow { 
+    0% { background-position: 0% 50%; } 
+    50% { background-position: 100% 50%; } 
+    100% { background-position: 0% 50%; } 
 }
 
-.modal-content {
-    background-color: #fefefe;
-    margin: 5% auto; 
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-    width: 90%;
-    max-width: 500px;
+.bingo-card-image { 
+    max-width: 100%; 
+    height: auto; 
+    border-radius: 0.75rem; 
+    border: 4px solid #800080; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4); 
 }
 
-.modal-legal-content {
-    /* Estilo específico para el modal legal */
-    max-height: 90vh; 
+#footer-logo { 
+    max-width: 150px; 
+    height: auto; 
+    cursor: pointer; 
+    transition: transform 0.1s; 
+}
+#footer-logo:active { transform: scale(0.9); }
+
+/* Modales */
+.modal { 
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    background-color: rgba(0,0,0,0.85); display: none; 
+    justify-content: center; align-items: center; 
+    z-index: 1000; overflow-y: auto; padding: 20px 0; 
+}
+.modal-content { 
+    background-color: white; border-radius: 1rem; padding: 1.5rem; 
+    width: 90%; max-width: 500px; 
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); position: relative; 
+}
+.modal-legal-content { 
+    background-color: white; border-radius: 1rem; padding: 1.5rem; 
+    width: 95%; max-width: 800px; 
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); 
+    position: relative; max-height: 90vh; 
+}
+.modal-legal-body { overflow-y: auto; max-height: 70vh; padding: 1rem 0;}
+
+/* Overlay Cerrado (Juego) */
+.closed-overlay { 
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    background-color: white; 
+    display: none; flex-direction: column; justify-content: center; align-items: center; 
+    z-index: 9999; text-align: center; color: #1f2937;
 }
 
-/* Overlay de Mantenimiento */
-.closed-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #f7f7f7; 
-    z-index: 9999;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
+canvas {
+    border-bottom: 2px solid #5b21b6;
+    background: transparent;
+    touch-action: manipulation;
 }
 
-/*
-    ======================================
-    Estilos Específicos del Juego (Tablas)
-    ======================================
-*/
+/* Bolas de Bingo */
+.card-item-container { 
+    display: flex; flex-direction: column; align-items: center; 
+    padding: 2px; cursor: pointer; transition: transform 0.1s; 
+}
+.card-item-container:hover { transform: scale(1.05); }
 
-/* Estilo para los botones de las tablas */
-.card-btn {
-    width: 100%;
-    aspect-ratio: 1 / 1; /* Hace que sea un cuadrado */
-    font-weight: 900;
-    font-size: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    transition: transform 0.1s, box-shadow 0.1s;
-    cursor: pointer;
+.bingo-ball { 
+    width: 48px; height: 48px; display: flex; 
+    justify-content: center; align-items: center; 
+    font-size: 18px; font-weight: 900; border-radius: 50%; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2); z-index: 2; position: relative;
 }
+.ver-tag { 
+    font-size: 10px; font-weight: bold; background-color: #fcd34d; 
+    color: #1f2937; padding: 1px 6px; margin-top: 4px; 
+    border-radius: 4px; border: 1px solid #fbbf24; z-index: 2; position: relative; 
+}
+.ver-tag:hover { background-color: #fbbf24; }
 
-.card-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
+/* Estados */
+.status-available .bingo-ball { background-color: #6b21a8; color: white; border: 2px solid #5b21b6; }
+.status-selected .bingo-ball { background-color: #fcd34d; color: #1f2937; border: 2px solid #fbbf24; transform: scale(1.1); }
+.status-reserved .bingo-ball { background-color: #f97316; color: white; border: 2px solid #ea580c; animation: pulse-orange 2s infinite; }
+.status-sold .bingo-ball { background-color: #16a34a; color: white; border: 2px solid #15803d; }
 
-/* Colores de estado (tailwindcss ya debe aplicarlos, pero aquí para asegurar) */
-.card-free {
-    background-color: #ede9fe; /* purple-100 */
-    color: #5b21b6; /* purple-700 */
-}
-.card-selected {
-    background-color: #fcd34d; /* yellow-400 */
-    color: #92400e; /* amber-800 */
-    border: 3px solid #d97706;
-}
-.card-reserved {
-    background-color: #fdba74; /* orange-300 */
-    color: #9a3412; /* orange-800 */
-    cursor: not-allowed;
-}
-.card-sold {
-    background-color: #34d399; /* emerald-400 */
-    color: #064e3b; /* emerald-900 */
-    cursor: not-allowed;
+@keyframes pulse-orange { 
+    0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7); } 
+    70% { box-shadow: 0 0 0 10px rgba(249, 115, 22, 0); } 
+    100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); } 
 }
 
-/*
-    ======================================
-    Estilos de Diseño YoBingo
-    ======================================
-*/
-
-/* Estilo para las tarjetas de sala */
-.room-card {
-    transition: all 0.3s ease;
+.omega-title { 
+    font-family: 'Poppins', sans-serif; font-weight: 900; 
+    font-size: 3rem; line-height: 1; text-shadow: 2px 2px 0 #5b21b6; color: #fcd34d; 
 }
-
-.room-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+#countdownTimer { 
+    font-size: 2.5rem; font-weight: 900; color: #fcd34d; text-shadow: 2px 2px 0 #5b21b6; 
 }
-
-/* Animación de la imagen en hover */
-.room-card img {
-    transition: transform 0.5s ease-out;
-}
+.admin-panel { min-height: 100vh; background: #f3f4f6; padding: 2rem; }
