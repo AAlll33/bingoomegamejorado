@@ -211,3 +211,118 @@ footer { background: #222; color: #888; text-align: center; padding: 20px; font-
     .nav-links.active { display: flex; } /* Se muestra cuando JS añade la clase active */
     .mobile-menu-icon { display: block; }
 }
+
+/* ================= SLIDER PRINCIPAL (CARRUSEL) ================= */
+.main-slider {
+    position: relative;
+    width: 100%;
+    height: 350px; /* Altura fija para el banner principal */
+    overflow: hidden;
+    background-color: var(--primary-color);
+}
+
+.slider-container {
+    display: flex;
+    width: 300%; /* 3 diapositivas * 100% */
+    height: 100%;
+    transition: transform 0.5s ease-in-out;
+}
+
+.slide-item {
+    min-width: calc(100% / 3); /* Para que cada slide ocupe un tercio del contenedor */
+    display: flex;
+    position: relative;
+    text-align: center;
+    color: var(--text-white);
+    text-decoration: none; /* Quitamos el subrayado del enlace */
+}
+
+.slide-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0.6; /* Oscurecemos la imagen para que el texto se lea mejor */
+}
+
+.slide-content {
+    position: relative;
+    z-index: 10;
+    margin: auto;
+    padding: 20px;
+    max-width: 80%;
+}
+
+.slide-content h1 {
+    font-size: 2.5rem;
+    color: var(--text-white);
+    margin-bottom: 5px;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+}
+
+.slide-content p {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+}
+
+.cta-slide {
+    display: inline-block;
+    background-color: var(--button-green);
+    color: white;
+    padding: 10px 25px;
+    border-radius: 25px;
+    font-weight: bold;
+    box-shadow: 0 4px 0 #558b2f;
+    transition: background-color 0.3s;
+}
+.cta-slide:hover { background-color: #66bb6a; }
+
+/* Botones de Navegación (Flechas) */
+.slider-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.4);
+    color: white;
+    border: none;
+    padding: 15px 10px;
+    cursor: pointer;
+    z-index: 20;
+    font-size: 1.5rem;
+}
+.slider-btn.prev { left: 10px; border-radius: 5px 0 0 5px; }
+.slider-btn.next { right: 10px; border-radius: 0 5px 5px 0; }
+
+/* Indicadores (Puntos de abajo) */
+.slider-dots {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+}
+.dot {
+    height: 10px;
+    width: 10px;
+    margin: 0 4px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    display: inline-block;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.dot.active {
+    background-color: var(--secondary-color);
+    width: 25px;
+    border-radius: 10px;
+}
+
+/* RESPONSIVE para el Slider */
+@media (max-width: 768px) {
+    .main-slider { height: 250px; }
+    .slide-content h1 { font-size: 1.8rem; }
+    .slide-content p { font-size: 0.9rem; }
+    .slider-btn { padding: 8px 5px; }
+}
