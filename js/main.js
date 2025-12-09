@@ -83,3 +83,74 @@ document.addEventListener('DOMContentLoaded', function() {
     // Iniciar al cargar la página
     startAutoSlide();
 });
+
+// --- LÓGICA DEL SLIDER (Swipe + Automático) ---
+const sliderWrapper = document.getElementById('sliderWrapper');
+const slides = document.querySelectorAll('.slide');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+
+let currentIndex = 0;
+const totalSlides = slides.length;
+let autoSlideInterval;
+
+// Función para mover el slider
+function updateSlider() {
+    sliderWrapper.style.transform = `translateX(-${currentIndex * 100}%)`;
+}
+
+function nextSlide() {
+    currentIndex = (currentIndex + 1) % totalSlides;
+    updateSlider();
+}
+
+function prevSlide() {
+    currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+    updateSlider();
+}
+
+// Botones
+nextBtn.addEventListener('click', () => {
+    nextSlide();
+    resetTimer();
+});
+
+prevBtn.addEventListener('click', () => {
+    prevSlide();
+    resetTimer();
+});
+
+// Automático
+function startTimer() {
+    autoSlideInterval = setInterval(nextSlide, 4000); // Cambia cada 4 segundos
+}
+
+function resetTimer() {
+    clearInterval(autoSlideInterval);
+    startTimer();
+}
+
+startTimer();
+
+// --- FUNCIONALIDAD TÁCTIL (SWIPE) ---
+let touchStartX = 0;
+let touchEndX = 0;
+
+sliderWrapper.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+}, {passive: true});
+
+sliderWrapper.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+    resetTimer(); // Reiniciar timer al tocar
+}, {passive: true});
+
+function handleSwipe() {
+    if (touchEndX < touchStartX - 50) {
+        nextSlide(); // Deslizó a la izquierda
+    }
+    if (touchEndX > touchStartX + 50) {
+        prevSlide(); // Deslizó a la derecha
+    }
+}
