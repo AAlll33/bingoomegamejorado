@@ -326,3 +326,322 @@ footer { background: #222; color: #888; text-align: center; padding: 20px; font-
     .slide-content p { font-size: 0.9rem; }
     .slider-btn { padding: 8px 5px; }
 }
+
+/* --- 1. CONFIGURACIÓN GENERAL Y FONDO --- */
+:root {
+    --primary: #FFD700; /* Dorado */
+    --secondary: #d500f9; /* Violeta brillante */
+    --dark: #120a2e; /* Violeta muy oscuro */
+    --light: #ffffff;
+    --gradient-start: #aa00ff;
+    --gradient-end: #31004a;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    /* Fondo Gradiente Central con Animación (Estilo Chat WhatsApp) */
+    background: radial-gradient(circle at center, #d500f9, #7b1fa2, #4a148c, #000000);
+    background-size: 200% 200%;
+    color: var(--light);
+    animation: gradientMove 15s ease infinite;
+    overflow-x: hidden;
+    padding-bottom: 80px; /* Espacio para el botón flotante */
+}
+
+@keyframes gradientMove {
+    0% { background-position: center center; background-size: 150%; }
+    50% { background-position: center center; background-size: 100%; }
+    100% { background-position: center center; background-size: 150%; }
+}
+
+a { text-decoration: none; color: inherit; }
+
+/* --- 2. HEADER --- */
+header {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--primary);
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    letter-spacing: 1px;
+}
+
+.header-btn {
+    background: linear-gradient(45deg, #ff00cc, #333399);
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 15px rgba(213, 0, 249, 0.4);
+}
+
+/* --- 3. SLIDER PROFESIONAL (Touch) --- */
+.main-slider {
+    position: relative;
+    width: 100%;
+    height: 280px; /* Altura ajustada móvil */
+    overflow: hidden;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.slider-wrapper {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.slide {
+    min-width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.7);
+}
+
+.slide-content {
+    position: absolute;
+    text-align: center;
+    z-index: 2;
+    padding: 20px;
+    width: 90%;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 15px;
+    bottom: 20px; /* Posición abajo */
+}
+
+.slide-content h2 {
+    font-size: 1.8rem;
+    color: var(--primary);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    text-shadow: 2px 2px 0px #000;
+}
+
+.slide-content p {
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    text-shadow: 1px 1px 2px #000;
+}
+
+.btn-slide {
+    background: var(--primary);
+    color: #000;
+    padding: 8px 25px;
+    border-radius: 50px;
+    font-weight: bold;
+    display: inline-block;
+    box-shadow: 0 0 15px var(--primary);
+    animation: pulse 2s infinite;
+}
+
+/* Botones de navegación slider */
+.slider-nav {
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 10px;
+    transform: translateY(-50%);
+    z-index: 10;
+    pointer-events: none; /* Para poder hacer swipe */
+}
+
+.nav-btn {
+    pointer-events: auto;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- 4. TÍTULOS DE SECCIÓN --- */
+.section-title {
+    text-align: center;
+    margin: 30px 0 20px;
+    font-size: 1.4rem;
+    text-transform: uppercase;
+    background: linear-gradient(to right, #fff, #ffd700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+}
+
+/* --- 5. CARRUSEL INFINITO DE JUEGOS (Dinámico) --- */
+.games-marquee {
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 20px 0;
+    background: rgba(0,0,0,0.2);
+    position: relative;
+}
+
+.games-track {
+    display: inline-flex;
+    animation: scroll 20s linear infinite; /* Movimiento automático */
+}
+
+/* Pausar animación al tocar/hover */
+.games-track:hover {
+    animation-play-state: paused;
+}
+
+@keyframes scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); } /* Mueve la mitad porque duplicamos contenido */
+}
+
+.game-card {
+    width: 160px;
+    margin: 0 10px;
+    background: linear-gradient(145deg, #2a1b52, #150d2e);
+    border-radius: 15px;
+    overflow: hidden;
+    display: inline-block;
+    text-align: center;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    transition: transform 0.3s;
+    position: relative;
+}
+
+.game-card:hover {
+    transform: scale(1.05) translateY(-5px);
+    border-color: var(--primary);
+}
+
+.card-img-top {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    background: #333; /* Placeholder color */
+}
+
+.bote-tag {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: red;
+    color: white;
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-weight: bold;
+    box-shadow: 0 0 10px red;
+    animation: blink 1s infinite alternate;
+}
+
+.card-body {
+    padding: 10px;
+    white-space: normal; /* Permite texto en varias líneas dentro de la tarjeta */
+}
+
+.card-body h3 { font-size: 1rem; color: #fff; margin-bottom: 5px; }
+.card-body span { font-size: 0.8rem; color: #aaa; display: block; margin-bottom: 10px; }
+
+.btn-play {
+    background: transparent;
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.game-card:hover .btn-play {
+    background: var(--primary);
+    color: #000;
+}
+
+/* --- 6. BOTÓN FLOTANTE RESERVA --- */
+.fab-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.btn-reserve {
+    background: linear-gradient(45deg, #00c853, #b2ff59);
+    color: #004d40;
+    padding: 15px 25px;
+    border-radius: 50px;
+    font-weight: 900;
+    font-size: 1.1rem;
+    box-shadow: 0 5px 20px rgba(0, 200, 83, 0.6);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    transition: transform 0.2s;
+    animation: bounce 2s infinite;
+}
+
+.btn-reserve:active { transform: scale(0.95); }
+
+/* --- ANIMACIONES --- */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+@keyframes blink { from { opacity: 1; } to { opacity: 0.6; } }
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+    40% {transform: translateY(-10px);}
+    60% {transform: translateY(-5px);}
+}
+
+/* --- INFO EXTRA --- */
+.payment-strip {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    font-size: 2rem;
+    color: rgba(255,255,255,0.5);
+    margin: 20px 0;
+}
