@@ -3,338 +3,277 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OMEGA BINGO - La Emoción del Juego Virtual</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>OMEGA Bingo - Panel Oficial</title>
     
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    
-    <link rel="stylesheet" href="styles.css"> 
-    
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f7f7f7; /* Fondo general más claro */
-        }
-    </style>
-</head>
-<body>
 
-    <div id="closedStoreOverlay" class="closed-overlay select-none hidden">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="min-h-screen">
+
+    <div id="closedStoreOverlay" class="closed-overlay select-none">
         <div id="adminSecretLock" class="absolute top-5 right-5 text-gray-300 cursor-pointer p-2 opacity-30 hover:opacity-100 z-50">
             <i class="fas fa-lock fa-lg"></i>
         </div>
-        <div class="relative w-full max-w-lg h-full flex flex-col justify-center items-center p-4">
-            <div class="text-center w-full px-4 mb-4">
-                <h2 class="text-3xl font-black text-purple-800 uppercase tracking-wide drop-shadow-sm">¡Sala en Mantenimiento!</h2>
-                <p class="text-gray-500 text-sm font-bold">Abrimos a las 8:00 AM</p>
-                <div class="inline-block bg-yellow-400 text-purple-900 font-black px-4 py-1 rounded-full text-sm shadow-md mt-2">
+
+        <div class="relative w-full max-w-lg h-full flex flex-col justify-center items-center">
+            <div class="absolute top-10 text-center w-full px-4">
+                <h2 class="text-2xl font-black text-purple-800 mb-1 uppercase tracking-wide">¡Aún estamos cerrados!</h2>
+                <p class="text-gray-500 text-sm font-bold mb-2">Reservas a partir de las 8:00 AM</p>
+                <div class="inline-block bg-yellow-400 text-purple-900 font-black px-4 py-1 rounded-full text-sm shadow-md">
                     SCORE: <span id="gameScore">0</span>
                 </div>
             </div>
-            <div class="relative w-full h-[250px] flex items-center justify-center bg-white rounded-xl shadow-inner border-b-4 border-gray-200 overflow-hidden cursor-pointer" id="gameContainer" onclick="jumpDino()">
+
+            <div class="relative w-full h-[300px] flex items-center justify-center bg-white overflow-hidden" id="gameContainer" onclick="jumpDino()">
                 <canvas id="dinoCanvas"></canvas>
-                <div id="gameMessage" class="absolute inset-0 flex flex-col items-center justify-center bg-white/90 z-10">
-                    <p class="text-purple-800 font-black text-xl mb-2" id="msgTitle">¿ABURRIDO?</p>
+                <div id="gameMessage" class="absolute inset-0 flex flex-col items-center justify-center bg-white/80 z-10">
+                    <p class="text-purple-800 font-black text-xl mb-2" id="msgTitle">¡JUEGA MIENTRAS ESPERAS!</p>
+                    <p class="text-gray-600 text-sm mb-4">Toca la pantalla para saltar</p>
                     <button onclick="startGame()" class="bg-purple-600 text-white font-bold py-2 px-6 rounded-full shadow-lg hover:scale-105 transition-transform animate-pulse">
-                        JUGAR DINO RUN 🦖
+                        EMPEZAR A CORRER 🚀
                     </button>
                 </div>
             </div>
-            <p class="mt-8 text-gray-400 text-xs text-center">OMEGA SYSTEM © 2025</p>
+
+            <p class="mt-8 text-gray-400 text-xs text-center px-6">
+                Próximo Bingo para el 8/12/25 - 7:00 PM<br>
+                ¡Partidas EN VIVO por Whatsapp!
+            </p>
+            <div class="mt-4 border-t border-gray-100 pt-4 w-1/2 mx-auto text-center">
+                <p class="text-[10px] text-gray-300 font-bold tracking-widest">© OMEGA BINGO SYSTEM</p>
+            </div>
         </div>
     </div>
 
-    <div id="adminPanel" class="hidden min-h-screen bg-gray-100 p-4">
+    <div id="adminPanel" class="admin-panel hidden">
         <div class="max-w-4xl mx-auto">
-            <div class="flex justify-between items-center mb-8 bg-white p-4 rounded-xl shadow-md border-l-4 border-purple-800">
-                <h1 class="text-2xl font-extrabold text-purple-800">🔐 Panel OMEGA</h1>
+            <div class="flex justify-between items-center mb-8 bg-white p-4 rounded-xl shadow-md">
+                <h1 class="text-2xl font-extrabold text-purple-800">🔐 Panel de Control OMEGA</h1>
                 <button onclick="adminLogout()" class="px-4 py-2 bg-red-500 text-white font-bold rounded hover:bg-red-600">Salir</button>
             </div>
+
             <div id="adminLogin" class="max-w-md mx-auto bg-white p-8 rounded-xl shadow-lg">
-                <h2 class="text-xl font-bold mb-4 text-gray-700">Acceso Restringido</h2>
+                <h2 class="text-xl font-bold mb-4 text-gray-700">Iniciar Sesión Admin</h2>
                 <input type="email" id="adminEmail" placeholder="Correo" class="w-full p-3 border rounded mb-3">
                 <input type="password" id="adminPassword" placeholder="Contraseña" class="w-full p-3 border rounded mb-4">
                 <button onclick="adminLogin()" class="w-full py-3 bg-purple-600 text-white font-bold rounded hover:bg-purple-700">ENTRAR</button>
                 <p id="adminLoginError" class="text-red-500 text-sm mt-3 hidden"></p>
             </div>
-            <div id="adminDashboard" class="hidden space-y-6">
-                <div class="bg-white p-6 rounded-xl shadow-lg flex justify-between items-center">
+
+            <div id="adminDashboard" class="hidden space-y-8">
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-8 border-purple-600 flex justify-between items-center">
                     <div>
-                        <h2 class="text-lg font-bold text-gray-800">🏪 Estado de la Sala</h2>
-                        <p id="storeStatusText" class="text-sm">Cargando...</p>
+                        <h2 class="text-xl font-bold text-gray-800">🏪 Estado de la Tienda</h2>
+                        <p id="storeStatusText" class="text-sm text-gray-500">Cargando estado...</p>
                     </div>
-                    <button id="toggleStoreBtn" onclick="toggleStoreStatus()" class="px-6 py-2 rounded-lg font-bold text-white shadow-lg">...</button>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-yellow-400">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">⚠️ Pendientes (<span id="pendingCount">0</span>)</h2>
-                    <div id="pendingCardsList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-green-500">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold text-gray-800">✅ Ventas (<span id="soldCount">0</span>)</h2>
-                        <button onclick="downloadSoldList()" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">CSV</button>
-                    </div>
-                    <div class="overflow-x-auto max-h-96">
-                        <table class="min-w-full text-sm text-left"><tbody id="soldPlayersTableBody" class="divide-y"></tbody></table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div id="clientContent" class="block"> 
-        
-        <nav class="bg-purple-900 text-white p-4 shadow-2xl sticky top-0 z-40 border-b-4 border-yellow-400">
-            <div class="max-w-5xl mx-auto flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <img src="logo-omega-bingo.png" alt="Omega Logo" class="w-12 h-12 rounded-full border-4 border-yellow-500 bg-white shadow-lg">
-                    <span class="font-black text-2xl tracking-tighter text-yellow-400 hidden sm:inline">OMEGA<span class="text-white">BINGO</span></span>
-                </div>
-                
-                <div class="hidden md:flex space-x-6 font-bold">
-                    <a href="#bingo-principal" class="hover:text-yellow-400 transition">BINGO</a>
-                    <a href="#nuestras-salas" class="hover:text-yellow-400 transition">SALAS VIP</a>
-                    <a href="#pagos" class="hover:text-yellow-400 transition">PAGOS</a>
-                    <a href="#contacto" class="hover:text-yellow-400 transition">CONTACTO</a>
-                </div>
-                
-                <div class="flex items-center space-x-3">
-                    <div class="text-xs font-bold bg-green-500 text-gray-900 px-3 py-1 rounded-full border border-green-400 shadow-md">
-                        <i class="fas fa-circle text-white text-[8px] animate-pulse mr-1"></i> EN LÍNEA
-                    </div>
-                    </div>
-            </div>
-        </nav>
-
-        <div class="relative w-full overflow-hidden bg-gray-900 shadow-2xl h-[40vh] md:h-[60vh]">
-            <div id="carouselTrack" class="flex transition-transform duration-500 h-full">
-                <div class="min-w-full h-full relative flex items-center justify-center bg-cover bg-center" style="background-image: url('tablas/banner1.png');">
-                    <div class="absolute inset-0 bg-black/50"></div>
-                    <div class="text-center text-white p-4 relative z-10">
-                        <p class="text-sm font-bold uppercase text-yellow-400 mb-1 tracking-wider">¡El Mayor Bote Virtual!</p>
-                        <h2 class="text-3xl md:text-5xl font-black mb-4 drop-shadow-lg leading-tight">SUPERBOTE <br> ACUMULADO</h2>
-                        <p class="text-4xl md:text-6xl font-black text-red-500 drop-shadow-xl animate-pulse">BS. 1.450.000</p>
-                        <button onclick="showCardSelectionModal()" class="mt-6 py-3 px-8 bg-yellow-400 text-purple-900 font-black text-lg rounded-full shadow-2xl hover:bg-yellow-500 transition transform hover:scale-105">
-                            COMPRA TU TABLA
-                        </button>
-                    </div>
-                </div>
-                <div class="min-w-full h-full relative flex items-center justify-center bg-cover bg-center" style="background-image: url('tablas/banner2.png');">
-                    <div class="absolute inset-0 bg-black/60"></div>
-                    <div class="text-center text-white p-4 relative z-10">
-                        <h2 class="text-3xl md:text-5xl font-black text-green-400 mb-2">LOTTO ANIMALITOS</h2>
-                        <p class="font-bold text-xl mb-4">Gana con el sorteo de tu preferencia.</p>
-                        <a href="TU_LINK_WHATSAPP_ANIMALITOS" target="_blank" class="mt-4 py-3 px-8 bg-green-600 text-white font-black text-lg rounded-full shadow-2xl hover:bg-green-700 transition transform hover:scale-105">
-                            ¡ÚNETE AL GRUPO!
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <button onclick="moveCarousel(-1)" class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 text-white p-3 rounded-full hover:bg-white/40 transition">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button onclick="moveCarousel(1)" class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 text-white p-3 rounded-full hover:bg-white/40 transition">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-            <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2" id="carouselDots">
-                </div>
-        </div>
-
-        <div class="max-w-5xl mx-auto p-4 py-8">
-            
-            <section id="bingo-principal" class="mb-12">
-                <div class="bg-white rounded-xl shadow-2xl p-6 text-center border-t-8 border-purple-700">
-                    <p class="text-gray-500 text-sm font-bold uppercase tracking-widest mb-1">Próximo Sorteo</p>
-                    <div id="bingoDateDisplay" class="text-purple-800 font-extrabold text-xl mb-3">Lunes, 8 de Diciembre, 19:00 ¡EN VIVO!</div>
-                    <div id="countdownTimer" class="text-4xl font-black text-gray-800 font-mono tracking-tight bg-purple-50 text-purple-800 rounded-lg py-3 shadow-inner">--:--:--</div>
-                    
-                    <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 border-t pt-4">
-                        <div>
-                            <p class="text-xs text-gray-500 font-bold">Valor Tabla</p>
-                            <p class="text-3xl font-black text-green-600">Bs. 300</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 font-bold">Bote Base</p>
-                            <p class="text-3xl font-black text-gray-800">Bs. 200K</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 font-bold">Jugadores</p>
-                            <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full font-black text-xl">450</span>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 font-bold">Disponibles</p>
-                            <span id="availableCount" class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full font-black text-xl">--</span>
-                        </div>
-                    </div>
-
-                    <button onclick="showCardSelectionModal()" class="w-full mt-8 py-5 bg-gradient-to-r from-yellow-400 to-orange-500 text-purple-900 font-black text-2xl rounded-xl shadow-2xl hover:scale-[1.01] transition-transform uppercase tracking-wider border-b-8 border-orange-700 relative overflow-hidden group">
-                        <span class="relative z-10 flex items-center justify-center gap-3">
-                            <i class="fas fa-ticket-alt"></i> COMPRAR MI TABLA
-                        </span>
+                    <button id="toggleStoreBtn" onclick="toggleStoreStatus()" class="px-6 py-3 rounded-lg font-black text-white transition-colors shadow-lg">
+                        CARGANDO...
                     </button>
                 </div>
-            </section>
-            
-            <section id="nuestras-salas" class="mb-12">
-                <h3 class="text-3xl font-black text-gray-800 mb-6 border-b-4 border-yellow-400 pb-2 flex items-center gap-3">
-                    <i class="fas fa-users-cog text-purple-700"></i> Nuestras Salas Temáticas
-                </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    
-                    <a href="TU_LINK_WHATSAPP_SALA1" target="_blank" class="room-card relative block bg-white rounded-xl shadow-xl overflow-hidden group hover:shadow-2xl transition-all duration-300">
-                        <img src="tablas/sala_super.png" alt="Sala SuperBingo" class="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110">
-                        <div class="p-4">
-                            <h4 class="text-xl font-black text-purple-800">SuperBingo 90</h4>
-                            <p class="text-xs text-gray-500 mt-1">Abierta 24 horas. ¡El bingo más rápido y divertido!</p>
-                            <div class="mt-3 flex justify-between items-center">
-                                <span class="text-xl font-black text-red-600">Bs. 50K</span>
-                                <span class="bg-purple-600 text-white text-xs font-bold px-3 py-1 rounded-full">¡JUGAR!</span>
-                            </div>
-                        </div>
-                    </a>
 
-                    <a href="TU_LINK_WHATSAPP_LOTTO" target="_blank" class="room-card relative block bg-white rounded-xl shadow-xl overflow-hidden group hover:shadow-2xl transition-all duration-300">
-                        <img src="tablas/sala_lotto.png" alt="Sala Lotto Activo" class="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110">
-                        <div class="p-4">
-                            <h4 class="text-xl font-black text-purple-800">Lotto Activo VIP</h4>
-                            <p class="text-xs text-gray-500 mt-1">Todos los resultados al instante. ¡Grandes premios!</p>
-                            <div class="mt-3 flex justify-between items-center">
-                                <span class="text-xl font-black text-red-600">Bs. 80K</span>
-                                <span class="bg-purple-600 text-white text-xs font-bold px-3 py-1 rounded-full">¡VER!</span>
-                            </div>
-                        </div>
-                    </a>
-                    
-                    <a href="TU_LINK_WHATSAPP_ANIMALITOS" target="_blank" class="room-card relative block bg-white rounded-xl shadow-xl overflow-hidden group hover:shadow-2xl transition-all duration-300">
-                        <img src="tablas/sala_animalitos.png" alt="Sala Animalitos" class="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110">
-                        <div class="p-4">
-                            <h4 class="text-xl font-black text-purple-800">Animalitos Express</h4>
-                            <p class="text-xs text-gray-500 mt-1">La forma más divertida y rápida de apostar. ¡Abre ya!</p>
-                            <div class="mt-3 flex justify-between items-center">
-                                <span class="text-xl font-black text-red-600">Bs. 35K</span>
-                                <span class="bg-purple-600 text-white text-xs font-bold px-3 py-1 rounded-full">¡UNIRSE!</span>
-                            </div>
-                        </div>
-                    </a>
-
-                    <a href="TU_LINK_WHATSAPP_ELITE" target="_blank" class="room-card relative block bg-white rounded-xl shadow-xl overflow-hidden group hover:shadow-2xl transition-all duration-300">
-                        <img src="tablas/sala_elite.png" alt="Sala Elite" class="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110">
-                        <div class="p-4">
-                            <h4 class="text-xl font-black text-purple-800">Sala Élite 75</h4>
-                            <p class="text-xs text-gray-500 mt-1">Para los grandes jugadores. Tablas más caras, más premios.</p>
-                            <div class="mt-3 flex justify-between items-center">
-                                <span class="text-xl font-black text-red-600">Bs. 250K</span>
-                                <span class="bg-purple-600 text-white text-xs font-bold px-3 py-1 rounded-full">¡ACCESO!</span>
-                            </div>
-                        </div>
-                    </a>
-
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-8 border-yellow-400">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                        ⚠️ Pagos Pendientes por Confirmar (<span id="pendingCount">0</span>)
+                    </h2>
+                    <div id="pendingCardsList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
                 </div>
-            </section>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-                <div>
-                    <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-yellow-500">
-                        <h3 class="font-black text-2xl text-gray-700 mb-4 flex items-center gap-2">
-                            <i class="fas fa-search-dollar text-yellow-600"></i> ¿Ganaste? ¡Busca tu Tabla!
-                        </h3>
-                        <div class="flex gap-2">
-                            <input type="tel" id="searchPhoneInput" placeholder="Ej: 0412..." class="w-full p-3 border rounded bg-gray-50 text-base shadow-inner">
-                            <button onclick="searchCardByPhone()" class="bg-purple-700 text-white px-5 rounded-lg font-bold hover:bg-purple-800 transition"><i class="fas fa-search"></i></button>
-                        </div>
-                        <div id="searchResultArea" class="hidden mt-4 bg-purple-50 p-4 rounded-xl shadow-inner border-2 border-purple-100 text-center">
-                            <h3 id="resultTitle" class="font-bold text-purple-800 mb-2"></h3>
-                            <div id="resultContent" class="flex justify-center flex-wrap gap-2"></div>
-                        </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-8 border-green-500">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-bold text-gray-800">✅ Historial de Ventas (<span id="soldCount">0</span>)</h2>
+                        <button onclick="downloadSoldList()" class="bg-blue-600 text-white px-4 py-2 rounded font-bold hover:bg-blue-700">Descargar CSV</button>
                     </div>
-                </div>
-                <div>
-                    <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-purple-500 h-full">
-                        <h3 class="font-black text-2xl text-gray-800 mb-4 flex items-center gap-2">
-                            <i class="fas fa-comment-dots text-purple-600"></i> Comentarios de Clientes
-                        </h3>
-                        <form onsubmit="event.preventDefault(); alert('¡Gracias por tu comentario! Será revisado.');" class="mb-4">
-                            <div class="flex gap-2 mb-2">
-                                <input type="email" placeholder="Tu Correo" class="w-1/2 p-2 border rounded text-sm bg-gray-50" required>
-                                <input type="text" placeholder="Nombre" class="w-1/2 p-2 border rounded text-sm bg-gray-50" required>
-                            </div>
-                            <textarea placeholder="Escribe tu experiencia en OMEGA..." class="w-full p-2 border rounded text-sm bg-gray-50 mb-2 h-20"></textarea>
-                            <button class="bg-purple-800 text-white px-4 py-2 rounded text-sm font-bold w-full hover:bg-purple-900 transition">Publicar Comentario</button>
-                        </form>
-                        <div class="border-t pt-3">
-                            <div class="flex items-start gap-3 mb-3">
-                                <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center font-black text-yellow-600 text-base shadow-md">JP</div>
-                                <div>
-                                    <p class="text-sm font-bold text-gray-800">Juan Pérez</p>
-                                    <p class="text-sm text-gray-600">¡Súper rápido y confiable! Excelente plataforma, el pago fue instantáneo. ⭐️⭐️⭐️⭐️⭐️</p>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm text-left text-gray-600">
+                            <thead class="bg-gray-100 uppercase font-bold">
+                                <tr><th class="p-3">Nombre</th><th class="p-3">Tlf</th><th class="p-3">Tablas</th><th class="p-3">Acción</th></tr>
+                            </thead>
+                            <tbody id="soldPlayersTableBody" class="divide-y divide-gray-200"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-            
-            <section id="pagos" class="mb-12">
-                <div class="bg-purple-900 text-white p-8 rounded-xl shadow-2xl">
-                    <h3 class="font-black text-3xl text-yellow-400 mb-5 flex items-center">
-                        <i class="fas fa-wallet mr-3"></i> Opciones de Pago Rápido
-                    </h3>
-                    <p class="text-gray-200 mb-4">Utiliza Pago Móvil para asegurar tu tabla al instante. ¡Pulsa para copiar los datos!</p>
-                    <div class="space-y-4 text-lg text-gray-100">
-                        <div class="flex justify-between border-b border-purple-700 pb-2">
-                            <span class="font-bold">Banco:</span> 
-                            <span class="font-extrabold text-yellow-400 cursor-pointer hover:text-yellow-300 transition" onclick="copyToClipboard('0108')">
-                                0108 (Provincial) <i class="fas fa-copy ml-2 text-sm"></i>
-                            </span>
-                        </div>
-                        <div class="flex justify-between border-b border-purple-700 pb-2">
-                            <span class="font-bold">Cédula:</span> 
-                            <span class="font-extrabold text-yellow-400 cursor-pointer hover:text-yellow-300 transition" onclick="copyToClipboard('25822059')">
-                                V25822059 <i class="fas fa-copy ml-2 text-sm"></i>
-                            </span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="font-bold">Teléfono:</span> 
-                            <span class="font-extrabold text-yellow-400 cursor-pointer hover:text-yellow-300 transition" onclick="copyToClipboard('04129546751')">
-                                04129546751 <i class="fas fa-copy ml-2 text-sm"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            
-        </div> <footer id="contacto" class="bg-gray-900 text-white p-8 pt-12">
-            <div class="max-w-5xl mx-auto text-center">
-                <img src="logo-omega-bingo.png" id="footer-logo" class="mx-auto w-24 h-24 rounded-full shadow-xl bg-white p-2 mb-6 hover:scale-105 transition cursor-pointer" alt="Logo">
-                
-                <h4 class="text-2xl font-black text-yellow-400 mb-4">¡Síguenos y únete a nuestros grupos!</h4>
-                
-                <div class="flex justify-center space-x-8 mb-8">
-                    <a href="TU_LINK_WHATSAPP_PRINCIPAL" target="_blank" class="text-white hover:text-green-500 transform hover:scale-125 transition duration-300"><i class="fab fa-whatsapp fa-3x"></i></a>
-                    <a href="TU_LINK_FACEBOOK" target="_blank" class="text-white hover:text-blue-500 transform hover:scale-125 transition duration-300"><i class="fab fa-facebook-f fa-3x"></i></a>
-                    <a href="TU_LINK_INSTAGRAM" target="_blank" class="text-white hover:text-pink-500 transform hover:scale-125 transition duration-300"><i class="fab fa-instagram fa-3x"></i></a>
-                    <a href="TU_LINK_TELEGRAM" target="_blank" class="text-white hover:text-blue-400 transform hover:scale-125 transition duration-300"><i class="fab fa-telegram fa-3x"></i></a>
-                </div>
-                
-                <div class="flex justify-center space-x-6 mb-4 text-sm text-gray-400 border-t border-gray-700 pt-4">
-                    <button onclick="showLegalModal('terms')" class="hover:text-yellow-400 transition">Términos y Condiciones</button>
-                    <span>|</span>
-                    <button onclick="showLegalModal('privacy')" class="hover:text-yellow-400 transition">Política de Privacidad</button>
-                </div>
-                <p class="text-xs text-gray-600 mt-4">Juega responsablemente. OMEGA Bingo © 2025.</p>
-            </div>
-        </footer>
+        </div>
     </div>
-    
-    <div id="cardSelectionModal" class="modal">...</div>
-    <div id="cardPreviewModal" class="modal">...</div>
-    <div id="paymentProcessModal" class="modal">...</div>
-    <div id="legalModal" class="modal">...</div>
+
+    <div id="clientContent">
+        <div class="max-w-xl mx-auto p-4 pb-20">
+            <div class="bg-yellow-400 p-4 rounded-t-xl text-center shadow-lg border-b-4 border-purple-800 mb-4">
+                <p class="font-black text-xl text-gray-900">¡OMEGA BINGO MAYOR!</p>
+                <div class="mt-2 p-2 bg-purple-800 rounded-lg">
+                    <p class="text-purple-200 text-xs font-bold uppercase tracking-widest">
+                        Próximo Juego: <span id="bingoDateDisplay">--</span>
+                    </p>
+                    <div id="countdownTimer">--:--:--</div>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl shadow-lg text-center mb-6 border border-gray-200">
+                <p class="font-bold text-gray-600">Valor de la Tabla</p>
+                <p class="text-3xl font-black text-green-600">Bs. 300,00</p>
+                <div class="mt-2 flex justify-center gap-4 text-sm">
+                    <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full font-bold">Disponibles: <span id="availableCount">--</span></span>
+                </div>
+            </div>
+
+            <div class="text-center mb-8">
+                <h1 class="omega-title">OMEGA</h1>
+                <p class="omega-subtitle">Sistema de Reserva Online</p>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl shadow-xl mb-8 border-l-4 border-purple-600">
+                <h3 class="font-bold text-gray-800 mb-3 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                    Datos Pago Móvil
+                </h3>
+                <div class="space-y-2 text-sm text-gray-600">
+                    <div class="flex justify-between border-b pb-1"><span>Banco:</span> <span class="font-bold text-gray-900 cursor-pointer" onclick="copyToClipboard('0108')">0108 (Provincial) 📋</span></div>
+                    <div class="flex justify-between border-b pb-1"><span>Cédula:</span> <span class="font-bold text-gray-900 cursor-pointer" onclick="copyToClipboard('25822059')">V25822059 📋</span></div>
+                    <div class="flex justify-between"><span>Teléfono:</span> <span class="font-bold text-gray-900 cursor-pointer" onclick="copyToClipboard('04129546751')">04129546751 📋</span></div>
+                </div>
+            </div>
+
+            <button onclick="showCardSelectionModal()" class="w-full py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 font-black text-xl rounded-xl shadow-xl hover:scale-[1.02] transition-transform mb-8 uppercase tracking-wide">
+                Comprar Tablas 🎟️
+            </button>
+
+            <div class="grid gap-4">
+                <div class="bg-white p-5 rounded-xl shadow-md">
+                    <h3 class="font-bold text-gray-700 mb-2">🔍 Consultar por Teléfono</h3>
+                    <div class="flex gap-2">
+                        <input type="tel" id="searchPhoneInput" placeholder="Ej: 0412..." class="w-full p-2 border rounded bg-gray-50">
+                        <button onclick="searchCardByPhone()" class="bg-purple-600 text-white px-4 rounded font-bold">Ver</button>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-xl shadow-md">
+                    <h3 class="font-bold text-gray-700 mb-2">🆔 Ver Tabla Individual</h3>
+                    <div class="flex gap-2">
+                        <input type="number" id="cardNumberInput" placeholder="N° Tabla" class="w-full p-2 border rounded bg-gray-50">
+                        <button onclick="searchCard()" class="bg-purple-600 text-white px-4 rounded font-bold">Ver</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="searchResultArea" class="hidden mt-6 bg-white p-4 rounded-xl shadow-xl text-center border-2 border-purple-100">
+                <h3 id="resultTitle" class="font-bold text-lg text-purple-800 mb-2"></h3>
+                <div id="resultContent" class="flex justify-center flex-wrap gap-4"></div>
+                <p id="resultStatus" class="text-sm font-bold mt-2"></p>
+            </div>
+
+            <div class="mt-12 text-center">
+                <img src="logo-omega-bingo.png" id="footer-logo" class="mx-auto w-24 rounded-full shadow-lg bg-white p-1" alt="Logo">
+                <h3 class="text-xl font-bold text-white mb-4">Síguenos en Redes Sociales</h3>
+                <div class="flex justify-center space-x-6 mb-6">
+                    <a href="https://wa.me/584226431972" target="_blank" class="text-white hover:text-green-400 transition-colors" title="WhatsApp"><i class="fab fa-whatsapp fa-3x" style="color:#25D366;"></i></a>
+                    <a href="https://www.facebook.com/OmegabingoAA/" target="_blank" class="text-white hover:text-blue-600 transition-colors" title="Facebook"><i class="fab fa-facebook fa-3x"></i></a>
+                    <a href="https://www.instagram.com/omega_bingo?igsh=MTY4czZ0NDltZ2gxZA==" target="_blank" class="text-white hover:text-pink-600 transition-colors" title="Instagram"><i class="fab fa-instagram fa-3x"></i></a>
+                </div>
+
+                <div class="flex justify-center space-x-4 mb-6 text-sm">
+                    <button onclick="showLegalModal('terms')" class="text-yellow-300 font-bold hover:underline">Términos y Condiciones</button>
+                    <span class="text-purple-300">|</span>
+                    <button onclick="showLegalModal('privacy')" class="text-yellow-300 font-bold hover:underline">Política de Privacidad</button>
+                </div>
+
+                <p class="text-xs text-purple-200 mt-4">© OMEGA Bingo / Masson 2025. Todos los derechos reservados</p>
+                <img src="logo-masson-bingo.png" id="footer-logo-masson" class="h-auto w-16 inline-block" alt="logo"> 
+            </div>
+        </div>
+    </div>
+
+    <div id="cardSelectionModal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h3 class="text-xl font-bold text-gray-800">Selecciona tus Tablas</h3>
+                <button onclick="hideCardSelectionModal()" class="text-2xl text-gray-500">&times;</button>
+            </div>
+            <div class="flex justify-between text-[10px] font-bold text-gray-500 mb-4 px-2">
+                <span class="flex items-center"><div class="w-3 h-3 bg-purple-700 rounded-full mr-1"></div> Libre</span>
+                <span class="flex items-center"><div class="w-3 h-3 bg-yellow-400 rounded-full mr-1"></div> Tuya</span>
+                <span class="flex items-center"><div class="w-3 h-3 bg-orange-500 rounded-full mr-1"></div> Ocupada</span>
+                <span class="flex items-center"><div class="w-3 h-3 bg-green-600 rounded-full mr-1"></div> Vendida</span>
+            </div>
+            <div id="cardListContainer" class="grid grid-cols-6 sm:grid-cols-8 gap-2 max-h-[60vh] overflow-y-auto p-1"></div>
+            <div class="mt-4 border-t pt-4">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-gray-600 font-bold">Total a Pagar:</span>
+                    <span id="totalCostDisplay" class="text-2xl font-black text-green-600">Bs. 0,00</span>
+                </div>
+                <button onclick="preparePayment()" class="w-full py-3 bg-purple-600 text-white font-bold rounded-lg shadow-lg hover:bg-purple-700 transition">
+                    CONTINUAR A PAGO
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="cardPreviewModal" class="modal">
+        <div class="modal-content text-center">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Tabla N° <span id="previewNum" class="text-purple-600"></span></h3>
+            <div id="previewImgContainer" class="flex justify-center mb-4 p-2 bg-gray-100 rounded-lg"></div>
+            <p id="previewStatusText" class="font-bold mb-4"></p>
+            <div class="flex gap-3 justify-center">
+                <button id="btnPreviewAction" class="flex-1 py-2 bg-green-500 text-white font-bold rounded-lg shadow">LO QUIERO</button>
+                <button onclick="closePreview()" class="flex-1 py-2 bg-gray-300 text-gray-700 font-bold rounded-lg">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="paymentProcessModal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="text-lg font-bold text-purple-800">Confirmar Pago</h3>
+                <button onclick="hidePaymentModal()" class="text-2xl">&times;</button>
+            </div>
+            
+            <div class="bg-yellow-50 text-yellow-800 p-2 rounded text-center text-sm font-bold mb-4 border border-yellow-200">
+                ⏳ Tienes <span id="paymentTimer" class="text-red-600 text-lg">05:00</span> para enviar el capture.
+            </div>
+
+            <div class="space-y-3 mb-4">
+                <div class="flex justify-between text-sm border-b border-dashed pb-1">
+                    <span>Tablas:</span> <span id="payCardsList" class="font-bold text-purple-700"></span>
+                </div>
+                <div class="flex justify-between text-sm border-b border-dashed pb-1">
+                    <span>Total:</span> <span id="payTotal" class="font-bold text-green-600 text-lg"></span>
+                </div>
+            </div>
+
+            <form id="paymentForm" onsubmit="event.preventDefault(); submitPayment();" class="space-y-3">
+                <input type="text" id="payName" placeholder="Nombre y Apellido" class="w-full p-3 border rounded bg-gray-50" required>
+                <input type="tel" id="payPhone" placeholder="Teléfono (WhatsApp)" class="w-full p-3 border rounded bg-gray-50" required>
+                <input type="number" id="payRef" placeholder="Últimos 4 dígitos Referencia" class="w-full p-3 border rounded bg-gray-50" required>
+                
+                <div class="border-2 border-dashed border-purple-300 rounded-lg p-4 text-center bg-purple-50 cursor-pointer relative">
+                    <input type="file" id="payFile" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required>
+                    <p class="text-purple-600 font-bold text-sm">📸 Toca aquí para subir CAPTURE</p>
+                    <p id="fileNameDisplay" class="text-xs text-gray-500 mt-1"></p>
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-green-600 text-white font-bold rounded-lg shadow-lg hover:bg-green-700 transition">
+                    ENVIAR COMPROBANTE 🚀
+                </button>
+            </form>
+            <p id="uploadStatus" class="text-center text-sm mt-2 font-bold hidden"></p>
+        </div>
+    </div>
+
+    <div id="legalModal" class="modal">
+        <div class="modal-legal-content">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h3 id="legalModalTitle" class="text-xl font-bold text-gray-800"></h3>
+                <button onclick="hideLegalModal()" class="text-2xl text-gray-500">&times;</button>
+            </div>
+            <div id="legalModalBody" class="modal-legal-body text-sm text-gray-700"></div>
+        </div>
+    </div>
 
     <script src="game.js"></script>
     <script src="app.js"></script>
