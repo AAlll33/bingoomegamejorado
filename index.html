@@ -27,15 +27,50 @@
         </div>
     </header>
 
-    <section class="hero">
-        <div class="hero-content">
-            <h1>¡Juega al Bingo desde tu Móvil!</h1>
-            <p>Únete a nuestros grupos de WhatsApp y gana premios diarios.</p>
-            <a href="https://chat.whatsapp.com/TU_ENLACE_GRUPO_PRINCIPAL" class="cta-button">
-                UNIRSE AL GRUPO <i class="fab fa-whatsapp"></i>
-            </a>
-        </div>
-    </section>
+    <section class="main-slider" id="main-slider">
+    
+    <div class="slider-container">
+        
+        <a href="https://wa.me/TU_NUMERO_OFERTA_1" class="slide-item active" data-index="0">
+            <div class="slide-content">
+                <h1>🎉 BONO GRATIS</h1>
+                <p>¡5€ de Regalo para tu primera recarga! Haz clic para solicitarlo.</p>
+                <span class="cta-slide">SOLICITAR BONO</span>
+            </div>
+            <img src="images/slide-bono.jpg" alt="Bono de Bienvenida" class="slide-img"> 
+        </a>
+
+        <a href="https://chat.whatsapp.com/TU_ENLACE_BOTE_COMPARTIDO" class="slide-item" data-index="1">
+            <div class="slide-content">
+                <h1>💰 BOTE COMPARTIDO</h1>
+                <p>¡Más de 1.500€ acumulados! Las partidas más grandes están aquí.</p>
+                <span class="cta-slide">JUGAR YA</span>
+            </div>
+            <img src="images/slide-bote.jpg" alt="Bote Compartido" class="slide-img">
+        </a>
+
+        <a href="https://wa.me/TU_NUMERO_SHOW" class="slide-item" data-index="2">
+            <div class="slide-content">
+                <h1>🎤 EL SHOW EN VIVO</h1>
+                <p>Únete a nuestras transmisiones especiales y gana premios extra.</p>
+                <span class="cta-slide">VER SHOW</span>
+            </div>
+            <img src="images/slide-show.jpg" alt="Show en Vivo" class="slide-img">
+        </a>
+
+    </div>
+
+    <div class="slider-dots" id="slider-dots">
+        <span class="dot active" data-index="0"></span>
+        <span class="dot" data-index="1"></span>
+        <span class="dot" data-index="2"></span>
+    </div>
+
+    <button class="slider-btn prev" aria-label="Anterior" id="prev-btn"><i class="fas fa-chevron-left"></i></button>
+    <button class="slider-btn next" aria-label="Siguiente" id="next-btn"><i class="fas fa-chevron-right"></i></button>
+
+</section>
+
 
     <div class="payment-strip">
         <i class="fab fa-cc-visa"></i>
