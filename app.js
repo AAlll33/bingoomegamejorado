@@ -1,87 +1,7 @@
-// ======================================
-// Funcionalidad del Carrusel
-// ======================================
+// ==========================================================
+// ============== CONFIGURACIÓN FIREBASE & GLOBALES =========
+// ==========================================================
 
-const carouselTrack = document.getElementById('carouselTrack');
-const carouselDots = document.getElementById('carouselDots');
-let currentSlide = 0;
-let autoSlideInterval;
-
-// Obtener la cantidad de slides
-const slides = carouselTrack ? carouselTrack.children : [];
-const totalSlides = slides.length;
-
-if (totalSlides > 0 && carouselTrack) {
-    // 1. Inicializar los puntos (dots)
-    for (let i = 0; i < totalSlides; i++) {
-        const dot = document.createElement('div');
-        dot.classList.add('w-2', 'h-2', 'rounded-full', 'bg-white/50', 'cursor-pointer', 'transition');
-        dot.setAttribute('data-slide', i);
-        dot.onclick = () => goToSlide(i);
-        carouselDots.appendChild(dot);
-    }
-    
-    // 2. Función para mover el carrusel
-    function updateCarousel() {
-        if (!carouselTrack) return;
-        const offset = currentSlide * -100;
-        carouselTrack.style.transform = `translateX(${offset}%)`;
-        
-        // Actualizar el estado de los puntos
-        const dots = carouselDots.children;
-        for (let i = 0; i < dots.length; i++) {
-            dots[i].classList.remove('bg-yellow-400');
-            dots[i].classList.add('bg-white/50');
-        }
-        if (dots[currentSlide]) {
-            dots[currentSlide].classList.remove('bg-white/50');
-            dots[currentSlide].classList.add('bg-yellow-400');
-        }
-    }
-
-    // 3. Función de navegación manual
-    window.moveCarousel = function(direction) {
-        currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
-        updateCarousel();
-        // Reiniciar el temporizador al interactuar
-        resetAutoSlide();
-    }
-    
-    // 4. Función de navegación a un slide específico
-    function goToSlide(index) {
-        currentSlide = index;
-        updateCarousel();
-        resetAutoSlide();
-    }
-
-    // 5. Inicializar el carrusel automático
-    function startAutoSlide() {
-        autoSlideInterval = setInterval(() => {
-            currentSlide = (currentSlide + 1) % totalSlides;
-            updateCarousel();
-        }, 5000); // 5 segundos por slide
-    }
-
-    // 6. Reiniciar el temporizador
-    function resetAutoSlide() {
-        clearInterval(autoSlideInterval);
-        startAutoSlide();
-    }
-    
-    // Iniciar al cargar la página
-    updateCarousel();
-    startAutoSlide();
-}
-
-
-// ======================================
-// Otras funciones de app.js (Mantenidas)
-// ======================================
-// ... (Aquí iría el resto de tu código app.js, como searchCardByPhone, showCardSelectionModal, etc.)
-// ... 
-
-
-// 🚨 CONFIGURACIÓN FIREBASE OMEGA 🚨
 const firebaseConfig = {
     apiKey: "AIzaSyCwrGuhYZkfnH-Yva8CwaEMfEYhzCByrRA",
     authDomain: "omegareserva369-34542.firebaseapp.com",
@@ -96,55 +16,53 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
 
-// CONFIGURACIÓN BINGO
 const TOTAL_CARDS = 75;
 const CARD_PRICE = 300;
 const BINGO_DATE_STRING = 'December 8, 2025 19:00:00'; 
+const BINGO_DATE = new Date(BINGO_DATE_STRING).getTime(); 
 
 let selectedCards = JSON.parse(localStorage.getItem('omega_selected_cards')) || [];
 let liveData = {};
+let previewCard = null;
 let timerInterval;
 let adminClicks = 0;
-let isStoreOpen = true;
+let isStoreOpen = true; 
 
-// INIT
+// ================== INICIALIZACIÓN ==================
 window.onload = () => {
-    // Fecha
-    const d = new Date(BINGO_DATE_STRING);
-    document.getElementById('bingoDateDisplay').textContent = d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute:'2-digit' });
+    document.getElementById('bingoDateDisplay').textContent = new Date(BINGO_DATE).toLocaleDateString('es-ES', { 
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+    });
 
     startRealtimeSync();
     startBingoTimer();
-    checkStoreStatus();
+    checkStoreStatus(); 
     
-    // Timer Pago Pendiente
-    if (localStorage.getItem('omega_payment_start') && selectedCards.length > 0) startPaymentTimer();
+    const pendingTimer = localStorage.getItem('omega_payment_start');
+    if (pendingTimer && selectedCards.length > 0) {
+            startPaymentTimer(); 
+    }
 
-    // Input archivo nombre
     document.getElementById('payFile').addEventListener('change', function(e) {
         if(this.files[0]) document.getElementById('fileNameDisplay').textContent = this.files[0].name;
     });
-
-    // Iniciar Carrusel Automático
-    setInterval(() => moveCarousel(1), 5000);
 };
 
-// --- LOGICA CARRUSEL ---
-let currentSlide = 0;
-function moveCarousel(dir) {
-    const track = document.getElementById('carouselTrack');
-    const slides = track.children.length;
-    currentSlide = (currentSlide + dir + slides) % slides;
-    track.style.transform = `translateX(-${currentSlide * 100}%)`;
+function saveLocalSelection() {
+    localStorage.setItem('omega_selected_cards', JSON.stringify(selectedCards));
 }
 
-// --- LOGICA TIENDA ---
+// ----------------------------------------------------
+// =========== TIENDA Y ADMIN LOCK ====================
+// ----------------------------------------------------
+
 function checkStoreStatus() {
     db.collection('config').doc('general').onSnapshot(doc => {
         if (doc.exists) {
             isStoreOpen = doc.data().isStoreOpen;
         } else {
-            isStoreOpen = true; // Por defecto abierta
+            db.collection('config').doc('general').set({ isStoreOpen: true });
+            isStoreOpen = true;
         }
         updateStoreUI();
     });
@@ -152,38 +70,60 @@ function checkStoreStatus() {
 
 function updateStoreUI() {
     const overlay = document.getElementById('closedStoreOverlay');
-    const statusText = document.getElementById('storeStatusText');
+    const currentUser = auth.currentUser;
     const btn = document.getElementById('toggleStoreBtn');
-    
-    // UI Admin
+    const statusText = document.getElementById('storeStatusText');
+
     if(btn) {
-        btn.textContent = isStoreOpen ? "CERRAR TIENDA" : "ABRIR TIENDA";
-        btn.className = isStoreOpen ? "bg-red-600 text-white px-4 py-2 rounded font-bold" : "bg-green-600 text-white px-4 py-2 rounded font-bold";
-        statusText.textContent = isStoreOpen ? "Tienda ABIERTA" : "Tienda CERRADA";
-        statusText.className = isStoreOpen ? "text-green-600 font-bold" : "text-red-600 font-bold";
+        if(isStoreOpen) {
+            btn.textContent = "CERRAR TIENDA 🔒";
+            btn.className = "px-6 py-3 rounded-lg font-black text-white transition-colors shadow-lg bg-red-600 hover:bg-red-700";
+            statusText.textContent = "La tienda está ABIERTA al público.";
+            statusText.className = "text-sm text-green-600 font-bold";
+        } else {
+            btn.textContent = "ABRIR TIENDA 🔓";
+            btn.className = "px-6 py-3 rounded-lg font-black text-white transition-colors shadow-lg bg-green-600 hover:bg-green-700";
+            statusText.textContent = "La tienda está CERRADA al público.";
+            statusText.className = "text-sm text-red-600 font-bold";
+        }
     }
 
-    // UI Cliente
-    if (!isStoreOpen && !auth.currentUser) {
+    if (!isStoreOpen && !currentUser) {
         overlay.style.display = 'flex';
         document.body.style.overflow = 'hidden';
     } else {
         overlay.style.display = 'none';
         document.body.style.overflow = 'auto';
-        if(typeof stopGameLogic === 'function') stopGameLogic();
+        stopGameLogic();
     }
 }
 
 function toggleStoreStatus() {
     const newState = !isStoreOpen;
-    if(confirm(newState ? "¿ABRIR tienda?" : "¿CERRAR tienda?")) {
-        db.collection('config').doc('general').set({ isStoreOpen: newState }, { merge: true });
+    if(confirm(newState ? "¿ABRIR la tienda al público?" : "¿CERRAR la tienda? Nadie podrá comprar.")) {
+        db.collection('config').doc('general').set({ isStoreOpen: newState }, { merge: true })
+        .catch(err => alert("Error: " + err.message));
     }
 }
 
-// --- LOGICA SELECCIÓN Y BINGO ---
+let lockClicks = 0;
+document.getElementById('adminSecretLock').addEventListener('click', () => {
+    lockClicks++;
+    if(lockClicks >= 6) {
+        document.getElementById('closedStoreOverlay').style.display = 'none'; 
+        stopGameLogic();
+        document.getElementById('clientContent').classList.add('hidden');
+        document.getElementById('adminPanel').classList.remove('hidden');
+        document.getElementById('adminLogin').classList.remove('hidden');
+        lockClicks = 0;
+    }
+});
+
+// ----------------------------------------------------
+// =========== SINCRONIZACIÓN Y LÓGICA DE BINGO =======
+// ----------------------------------------------------
+
 function startRealtimeSync() {
-    // Escuchar Ventas
     db.collection('ventasConfirmadas').onSnapshot(snap => {
         snap.docChanges().forEach(change => {
             const d = change.doc.data();
@@ -196,71 +136,110 @@ function startRealtimeSync() {
         if(auth.currentUser) renderAdminSoldList();
     });
 
-    // Escuchar Pendientes
     db.collection('reservasPendientes').onSnapshot(snap => {
         snap.docChanges().forEach(change => {
             const d = change.doc.data();
-            const docId = change.doc.id;
+            const docId = change.doc.id; 
             (d.cards || []).forEach(c => {
                 const isSold = liveData[c]?.status === 'sold';
-                if(change.type === 'removed') { if(!isSold) delete liveData[c]; }
-                else { if(!isSold) liveData[c] = { status: 'reserved', reservationId: docId, ...d }; }
+                if(change.type === 'removed') {
+                    if (!isSold) delete liveData[c];
+                } else {
+                    if(!isSold) liveData[c] = { status: 'reserved', reservationId: docId, ...d };
+                }
             });
         });
         updateUI();
         if(auth.currentUser) renderAdminPendingList();
     });
 
-    // Auth Listener
     auth.onAuthStateChanged(u => {
-        updateStoreUI();
+        updateStoreUI(); 
         if(u) {
             document.getElementById('clientContent').classList.add('hidden');
             document.getElementById('adminPanel').classList.remove('hidden');
             document.getElementById('adminLogin').classList.add('hidden');
             document.getElementById('adminDashboard').classList.remove('hidden');
-            renderAdminPendingList(); renderAdminSoldList();
+            renderAdminPendingList();
+            renderAdminSoldList();
+        } else {
+            document.getElementById('clientContent').classList.remove('hidden');
+            document.getElementById('adminPanel').classList.add('hidden');
         }
     });
 }
 
 function updateUI() {
     let sold = 0;
-    for(let i=1; i<=TOTAL_CARDS; i++) if(liveData[i]?.status === 'sold') sold++;
+    for(let i=1; i<=TOTAL_CARDS; i++) {
+        if(liveData[i]?.status === 'sold') sold++;
+    }
     document.getElementById('availableCount').textContent = TOTAL_CARDS - sold;
+    
     if(document.getElementById('cardSelectionModal').style.display === 'flex') renderGrid();
+    if(document.getElementById('paymentProcessModal').style.display === 'flex') checkPaymentConflicts();
+}
+
+function checkPaymentConflicts() {
+    let conflicts = [];
+    let newSelection = [];
+    selectedCards.forEach(card => {
+        const status = getStatus(card);
+        if (status === 'sold' || status === 'reserved') conflicts.push(card);
+        else newSelection.push(card);
+    });
+
+    if (conflicts.length > 0) {
+        alert(`⚠️ ¡ATENCIÓN! El número(s) ${conflicts.join(', ')} acaba de ser comprado. Han sido retirados.`);
+        selectedCards = newSelection;
+        saveLocalSelection();
+        if (selectedCards.length === 0) {
+            hidePaymentModal(); 
+            localStorage.removeItem('omega_payment_start'); 
+        } else {
+            document.getElementById('payCardsList').textContent = selectedCards.join(', ');
+            document.getElementById('payTotal').textContent = `Bs. ${(selectedCards.length * CARD_PRICE).toFixed(2)}`;
+        }
+    }
 }
 
 function showCardSelectionModal() {
     document.getElementById('cardPreviewModal').style.display = 'none';
     document.getElementById('paymentProcessModal').style.display = 'none';
-    document.getElementById('cardSelectionModal').style.display = 'flex';
-    renderGrid(); updateTotal();
+    document.getElementById('legalModal').style.display = 'none'; 
+    document.getElementById('cardSelectionModal').style.display = 'flex'; 
+    renderGrid();
+    updateTotal();
+    if(selectedCards.length > 0 && localStorage.getItem('omega_payment_start')) startPaymentTimer();
+    else clearInterval(timerInterval);
 }
-function hideCardSelectionModal() { document.getElementById('cardSelectionModal').style.display = 'none'; }
+
+function hideCardSelectionModal() {
+    document.getElementById('cardSelectionModal').style.display = 'none';
+}
+
+function getStatus(n) {
+    if(liveData[n]?.status === 'sold') return 'sold';
+    if(liveData[n]?.status === 'reserved') return 'reserved';
+    if(selectedCards.includes(n)) return 'selected'; 
+    return 'available';
+}
 
 function renderGrid() {
     const container = document.getElementById('cardListContainer');
     container.innerHTML = '';
     for(let i=1; i<=TOTAL_CARDS; i++) {
         const st = getStatus(i);
-        let tag = 'VER';
-        if(st === 'sold') tag = 'VEND';
-        if(st === 'reserved') tag = 'OCUP';
-        if(st === 'selected') tag = 'MIA';
-
+        let tag = st === 'sold' ? 'VENDIDA' : (st === 'reserved' ? 'OCUPADA' : (st === 'selected' ? 'TUYA' : 'VER'));
+        
         const div = document.createElement('div');
         div.className = `card-item-container status-${st}`;
-        div.innerHTML = `<div class="bingo-ball" onclick="handleBallClick(${i}, '${st}')">${i}</div><span class="ver-tag">${tag}</span>`;
+        div.innerHTML = `
+            <div class="bingo-ball" onclick="handleBallClick(${i}, '${st}')">${i}</div>
+            <span class="ver-tag" onclick="event.stopPropagation(); openPreview(${i})">${tag}</span>
+        `;
         container.appendChild(div);
     }
-}
-
-function getStatus(n) {
-    if(liveData[n]?.status === 'sold') return 'sold';
-    if(liveData[n]?.status === 'reserved') return 'reserved';
-    if(selectedCards.includes(n)) return 'selected';
-    return 'available';
 }
 
 function handleBallClick(n, st) {
@@ -268,9 +247,16 @@ function handleBallClick(n, st) {
         openPreview(n);
     } else {
         if(selectedCards.includes(n)) selectedCards = selectedCards.filter(x => x !== n);
-        else selectedCards.push(n);
-        localStorage.setItem('omega_selected_cards', JSON.stringify(selectedCards));
-        updateTotal(); renderGrid();
+        else {
+            if (liveData[n]?.status === 'sold' || liveData[n]?.status === 'reserved') {
+                    openPreview(n);
+                    return;
+            }
+            selectedCards.push(n);
+        }
+        saveLocalSelection(); 
+        updateTotal();
+        renderGrid(); 
     }
 }
 
@@ -278,51 +264,68 @@ function updateTotal() {
     document.getElementById('totalCostDisplay').textContent = `Bs. ${(selectedCards.length * CARD_PRICE).toFixed(2)}`;
 }
 
-// --- PREVIEW ---
 function openPreview(n) {
+    previewCard = n;
     const st = getStatus(n);
     const d = liveData[n];
     const btn = document.getElementById('btnPreviewAction');
     const txt = document.getElementById('previewStatusText');
     
     document.getElementById('previewNum').textContent = n;
-    // IMPORTANTE: Asegurate de tener tus imagenes en una carpeta llamada 'tablas'
-    document.getElementById('previewImgContainer').innerHTML = `<img src="./tablas/tabla_${n}.png" class="max-w-full h-auto rounded border-2 border-purple-500 shadow" onerror="this.src='https://placehold.co/200?text=Tabla+${n}'">`;
+    document.getElementById('previewImgContainer').innerHTML = `<img src="./tablas/tabla_${n}.png" class="bingo-card-image" onerror="this.src='https://placehold.co/300?text=Tabla+${n}'">`;
     
     if(st === 'sold') {
-        txt.textContent = `❌ VENDIDA (${d.name})`; txt.className = "text-red-600 font-bold mb-4"; btn.style.display = 'none';
+        txt.textContent = `❌ VENDIDA. (${d.name || 'Otro jugador'})`;
+        txt.className = "text-red-600 font-bold mb-4";
+        btn.style.display = 'none';
     } else if(st === 'reserved') {
-        txt.textContent = `⏳ OCUPADA (${d.name})`; txt.className = "text-orange-500 font-bold mb-4"; btn.style.display = 'none';
+        txt.textContent = `⏳ OCUPADA. (${d.name || 'Otro jugador'}) Esperando confirmación.`;
+        txt.className = "text-orange-500 font-bold mb-4";
+        btn.style.display = 'none';
     } else {
         const isSel = selectedCards.includes(n);
-        txt.textContent = isSel ? "¿Quitar de lista?" : "¿Agregar a lista?";
+        txt.textContent = isSel ? "¿Ya no quieres esta tabla?" : "¿Te gusta esta tabla?";
         txt.className = "text-gray-700 font-bold mb-4";
         btn.style.display = 'block';
-        btn.textContent = isSel ? "QUITAR" : "AGREGAR";
+        btn.textContent = isSel ? "QUITAR DE MI LISTA" : "AGREGAR A MI LISTA";
         btn.className = isSel ? "flex-1 py-2 bg-red-500 text-white font-bold rounded-lg" : "flex-1 py-2 bg-green-500 text-white font-bold rounded-lg";
         btn.onclick = () => {
-            if(isSel) selectedCards = selectedCards.filter(x => x !== n); else selectedCards.push(n);
-            localStorage.setItem('omega_selected_cards', JSON.stringify(selectedCards));
-            updateTotal(); closePreview(); showCardSelectionModal();
+            if(isSel) selectedCards = selectedCards.filter(x => x !== n);
+            else selectedCards.push(n);
+            saveLocalSelection();
+            updateTotal();
+            closePreview();
+            showCardSelectionModal();
         };
     }
     document.getElementById('cardSelectionModal').style.display = 'none';
     document.getElementById('cardPreviewModal').style.display = 'flex';
 }
-function closePreview() { document.getElementById('cardPreviewModal').style.display = 'none'; showCardSelectionModal(); }
 
-// --- PAGOS ---
+function closePreview() {
+    document.getElementById('cardPreviewModal').style.display = 'none';
+    showCardSelectionModal();
+}
+
+// ================== PAGO ==================
 function preparePayment() {
-    if(selectedCards.length === 0) return alert("Selecciona tablas primero.");
-    // Verificar si se ocuparon mientras elegía
-    let clean = [];
-    selectedCards.forEach(c => { if(!liveData[c]) clean.push(c); });
-    if(clean.length !== selectedCards.length) alert("Algunas tablas ya no están disponibles.");
-    selectedCards = clean;
-    if(selectedCards.length === 0) return hideCardSelectionModal();
+    if(selectedCards.length === 0) return alert("Selecciona al menos una tabla");
+    
+    // Validación final
+    for (const card of selectedCards) {
+        if (liveData[card] && (liveData[card].status === 'sold' || liveData[card].status === 'reserved')) {
+            alert("⚠️ Alguna tabla seleccionada ya no está disponible.");
+            return showCardSelectionModal();
+        }
+    }
+
+    document.getElementById('payName').value = '';
+    document.getElementById('payPhone').value = '';
+    document.getElementById('payRef').value = '';
+    document.getElementById('fileNameDisplay').textContent = '';
 
     if (!localStorage.getItem('omega_payment_start')) localStorage.setItem('omega_payment_start', Date.now());
-    
+
     hideCardSelectionModal();
     document.getElementById('paymentProcessModal').style.display = 'flex';
     document.getElementById('payCardsList').textContent = selectedCards.join(', ');
@@ -333,45 +336,63 @@ function preparePayment() {
 function startPaymentTimer() {
     const display = document.getElementById('paymentTimer');
     clearInterval(timerInterval);
-    const start = parseInt(localStorage.getItem('omega_payment_start'));
-    if (!start) return;
+    const startTime = parseInt(localStorage.getItem('omega_payment_start'));
+    if (!startTime) return; 
 
     timerInterval = setInterval(() => {
-        const left = 300 - Math.floor((Date.now() - start) / 1000); // 5 min
-        if(left <= 0) {
+        const now = Date.now();
+        const elapsedSeconds = Math.floor((now - startTime) / 1000);
+        const remaining = Math.max(0, 300 - elapsedSeconds);
+        const m = Math.floor(remaining / 60);
+        const s = remaining % 60;
+        display.textContent = `0${m}:${s<10?'0'+s:s}`;
+
+        if(remaining <= 0) {
             clearInterval(timerInterval);
-            localStorage.removeItem('omega_payment_start'); selectedCards = []; localStorage.removeItem('omega_selected_cards');
-            hidePaymentModal(); alert("Tiempo agotado."); updateUI();
-        } else {
-            const m = Math.floor(left / 60); const s = left % 60;
-            display.textContent = `0${m}:${s<10?'0'+s:s}`;
+            alert("Tiempo agotado. Tablas liberadas.");
+            localStorage.removeItem('omega_payment_start');
+            selectedCards = []; 
+            localStorage.removeItem('omega_selected_cards');
+            hidePaymentModal();
+            updateUI();
         }
     }, 1000);
 }
 
-function hidePaymentModal() { document.getElementById('paymentProcessModal').style.display = 'none'; showCardSelectionModal(); }
+function hidePaymentModal() {
+    document.getElementById('paymentProcessModal').style.display = 'none';
+    showCardSelectionModal();
+}
 
 async function submitPayment() {
+    const YOUR_CLOUD_NAME = "dcenrp74j"; 
+    const YOUR_UPLOAD_PRESET = "bingo_comprobantes"; 
+    
     const name = document.getElementById('payName').value;
-    const phone = document.getElementById('payPhone').value;
+    const phone = document.getElementById('payPhone').value.replace(/\D/g,'');
     const ref = document.getElementById('payRef').value;
     const file = document.getElementById('payFile').files[0];
     const statusMsg = document.getElementById('uploadStatus');
 
-    if(!file) return alert("Falta el capture");
-    statusMsg.textContent = "Subiendo... ⏳"; statusMsg.classList.remove('hidden');
+    if(!name || phone.length < 10 || !ref || !file) {
+        statusMsg.textContent = "Datos incompletos.";
+        statusMsg.className = "text-center text-sm mt-2 font-bold text-red-600 block";
+        return;
+    }
+
+    statusMsg.textContent = "Subiendo comprobante... ⏳";
+    statusMsg.className = "text-center text-sm mt-2 font-bold text-blue-600 block";
 
     try {
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('upload_preset', "bingo_comprobantes"); // TU PRESET CLOUDINARY
+        formData.append('upload_preset', YOUR_UPLOAD_PRESET);
         formData.append('public_id', `${phone}_${Date.now()}`); 
         
-        // Reemplaza 'dcenrp74j' por tu Cloud Name si cambia
-        const res = await fetch(`https://api.cloudinary.com/v1_1/dcenrp74j/image/upload`, { method: 'POST', body: formData });
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${YOUR_CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
         const data = await res.json();
         
-        if (!res.ok) throw new Error("Error subida");
+        if (!res.ok || !data.secure_url) throw new Error(data.error?.message || res.statusText);
 
         await db.collection('reservasPendientes').add({ 
             name, phone, reference: ref, proofURL: data.secure_url, 
@@ -380,42 +401,48 @@ async function submitPayment() {
         });
 
         statusMsg.textContent = "¡Enviado! 🎉";
-        confetti();
-        selectedCards = []; localStorage.removeItem('omega_selected_cards'); localStorage.removeItem('omega_payment_start');
+        confetti({ particleCount: 100, spread: 70 });
+        
+        selectedCards = [];
+        localStorage.removeItem('omega_selected_cards');
+        localStorage.removeItem('omega_payment_start');
         clearInterval(timerInterval);
-        setTimeout(() => { document.getElementById('paymentProcessModal').style.display = 'none'; alert("Enviado. Espera confirmación."); }, 1500);
+
+        setTimeout(() => {
+            hidePaymentModal();
+            alert("Pago enviado. Espera confirmación.");
+        }, 1500);
+
     } catch(e) {
-        statusMsg.textContent = "Error al subir."; console.error(e);
+        statusMsg.textContent = `Error: ${e.message}`;
+        statusMsg.className = "text-center text-sm mt-2 font-bold text-red-600 block";
     }
 }
 
-// --- ADMIN ---
-// Login secreto: Click 6 veces en el logo del footer
+// ================== ADMIN ==================
 document.getElementById('footer-logo').addEventListener('click', () => {
     adminClicks++;
     if(adminClicks >= 6) {
-        document.getElementById('closedStoreOverlay').style.display = 'none';
         document.getElementById('clientContent').classList.add('hidden');
         document.getElementById('adminPanel').classList.remove('hidden');
-        adminClicks = 0;
-    }
-});
-// Login secreto 2: Click 6 veces candado overlay
-document.getElementById('adminSecretLock').addEventListener('click', () => {
-    adminClicks++;
-    if(adminClicks >= 6) {
-        document.getElementById('closedStoreOverlay').style.display = 'none';
-        document.getElementById('clientContent').classList.add('hidden');
-        document.getElementById('adminPanel').classList.remove('hidden');
+        if(auth.currentUser) {
+            document.getElementById('adminLogin').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.remove('hidden');
+        }
         adminClicks = 0;
     }
 });
 
 function adminLogin() {
-    auth.signInWithEmailAndPassword(document.getElementById('adminEmail').value, document.getElementById('adminPassword').value)
-    .catch(e => document.getElementById('adminLoginError').textContent = e.message);
+    const e = document.getElementById('adminEmail').value;
+    const p = document.getElementById('adminPassword').value;
+    auth.signInWithEmailAndPassword(e, p).then(() => {
+        document.getElementById('adminLogin').classList.add('hidden');
+        document.getElementById('adminDashboard').classList.remove('hidden');
+    }).catch(err => document.getElementById('adminLoginError').textContent = err.message);
 }
-function adminLogout() { auth.signOut().then(()=>location.reload()); }
+
+function adminLogout() { auth.signOut().then(() => location.reload()); }
 
 function renderAdminPendingList() {
     db.collection('reservasPendientes').where('status', '==', 'PENDING_CONFIRMATION').onSnapshot(snap => {
@@ -424,91 +451,111 @@ function renderAdminPendingList() {
         document.getElementById('pendingCount').textContent = snap.size;
         snap.forEach(doc => {
             const d = doc.data();
-            div.innerHTML += `
-            <div class="bg-gray-50 p-3 rounded border border-gray-200">
-                <p class="font-bold">${d.name} (${d.phone})</p>
-                <p class="text-xs">Ref: ${d.reference} | Bs.${d.totalAmount}</p>
-                <p class="text-xs font-bold text-purple-600">Tablas: ${d.cards.join(',')}</p>
-                <a href="${d.proofURL}" target="_blank" class="text-blue-500 text-xs underline block mb-2">Ver Capture</a>
-                <div class="flex gap-2">
-                    <button onclick="confirmSale('${doc.id}')" class="bg-green-500 text-white px-3 py-1 rounded text-xs">Vender</button>
-                    <button onclick="rejectSale('${doc.id}')" class="bg-red-500 text-white px-3 py-1 rounded text-xs">Rechazar</button>
-                </div>
-            </div>`;
+            div.innerHTML += `<div class="bg-white p-4 rounded-lg shadow border-l-4 border-yellow-400"><div class="flex justify-between mb-2"><span class="font-bold text-gray-800">${d.name}</span><span class="text-sm bg-gray-200 px-2 rounded">${d.phone}</span></div><p class="text-sm text-gray-600 mb-1">Ref: <b>${d.reference}</b> | Bs. ${d.totalAmount}</p><p class="text-sm mb-2">Tablas: <b class="text-purple-600">${d.cards.join(', ')}</b></p><a href="${d.proofURL}" target="_blank" class="block text-center bg-blue-50 text-blue-600 py-1 rounded text-sm font-bold mb-3 border border-blue-200">Ver Comprobante</a><div class="flex gap-2"><button onclick="confirmSale('${doc.id}')" class="flex-1 bg-green-500 text-white py-2 rounded font-bold hover:bg-green-600">APROBAR</button><button onclick="rejectSale('${doc.id}')" class="flex-1 bg-red-500 text-white py-2 rounded font-bold hover:bg-red-600">RECHAZAR</button></div></div>`;
         });
     });
 }
 
 function renderAdminSoldList() {
-    db.collection('ventasConfirmadas').orderBy('saleDate', 'desc').limit(20).onSnapshot(snap => {
-        const tb = document.getElementById('soldPlayersTableBody');
-        tb.innerHTML = '';
+    db.collection('ventasConfirmadas').orderBy('saleDate', 'desc').limit(50).onSnapshot(snap => {
+        const tbody = document.getElementById('soldPlayersTableBody');
+        tbody.innerHTML = '';
         document.getElementById('soldCount').textContent = snap.size;
         snap.forEach(doc => {
             const d = doc.data();
-            tb.innerHTML += `<tr><td class="p-2">${d.name}</td><td class="p-2">${d.phone}</td><td class="p-2 text-green-600 font-bold">${d.cards.join(',')}</td><td class="p-2"><button onclick="deleteSale('${doc.id}')" class="text-red-500 text-xs">X</button></td></tr>`;
+            tbody.innerHTML += `<tr class="border-b hover:bg-gray-50"><td class="p-3 font-bold">${d.name}</td><td class="p-3 text-xs">${d.phone}</td><td class="p-3 text-green-600 font-bold text-xs break-all">${d.cards.join(',')}</td><td class="p-3"><button onclick="deleteSale('${doc.id}')" class="text-red-500 text-xs underline">Eliminar</button></td></tr>`;
         });
     });
 }
 
 function confirmSale(id) {
+    if(!confirm("¿Confirmar pago y vender tablas?")) return;
     db.collection('reservasPendientes').doc(id).get().then(doc => {
+        if (!doc.exists) return alert("Reserva no encontrada.");
         const d = doc.data();
+        let cardsToSell = [];
+        
+        d.cards.forEach(c => {
+            if (liveData[c]?.status !== 'sold') cardsToSell.push(c);
+        });
+        
+        if (cardsToSell.length === 0) return alert("Todas estas tablas ya fueron vendidas a otro.");
+        
         const batch = db.batch();
-        batch.set(db.collection('ventasConfirmadas').doc(), { name: d.name, phone: d.phone, cards: d.cards, saleDate: firebase.firestore.FieldValue.serverTimestamp() });
+        batch.set(db.collection('ventasConfirmadas').doc(), { 
+            name: d.name, phone: d.phone, cards: cardsToSell,
+            saleDate: firebase.firestore.FieldValue.serverTimestamp() 
+        });
         batch.delete(db.collection('reservasPendientes').doc(id));
-        batch.commit().then(() => alert("Venta confirmada"));
+        batch.commit().then(() => alert("Venta confirmada.")).catch(e => alert("Error"));
     });
 }
 
-function rejectSale(id) { if(confirm("¿Rechazar?")) db.collection('reservasPendientes').doc(id).delete(); }
-function deleteSale(id) { if(confirm("¿Eliminar venta?")) db.collection('ventasConfirmadas').doc(id).delete(); }
+function rejectSale(id) { 
+    if(confirm("¿Rechazar?")) db.collection('reservasPendientes').doc(id).delete();
+}
+
+function deleteSale(id) { 
+    if(confirm("¿Eliminar venta?")) db.collection('ventasConfirmadas').doc(id).delete();
+}
 
 function downloadSoldList() {
     db.collection('ventasConfirmadas').get().then(snap => {
-        let csv = "Nombre,Tlf,Tablas\n";
-        snap.forEach(doc => { const d = doc.data(); csv += `${d.name},${d.phone},"${d.cards.join(';')}"\n`; });
-        const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download = 'ventas.csv'; a.click();
+        let csv = "Nombre,Telefono,Tablas\n";
+        snap.forEach(doc => { 
+            const d = doc.data(); 
+            csv += `${d.name},${d.phone},"${d.cards.join(';')}"\n`; 
+        });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+        a.download = 'ventas_omega.csv';
+        a.click();
     });
 }
 
-// --- UTILS ---
+// ================== OTROS ==================
 function startBingoTimer() {
-    const el = document.getElementById('countdownTimer');
-    const target = new Date(BINGO_DATE_STRING).getTime();
+    const cd = document.getElementById('countdownTimer');
     setInterval(() => {
-        const diff = target - Date.now();
-        if(diff<0) { el.textContent="¡EN VIVO!"; return; }
-        const h = Math.floor((diff % (1000*60*60*24))/(1000*60*60));
-        const m = Math.floor((diff % (1000*60*60))/(1000*60));
-        const s = Math.floor((diff % (1000*60))/1000);
-        el.textContent = `${h}:${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
+        const dist = BINGO_DATE - new Date().getTime();
+        if (dist < 0) { cd.textContent = "¡JUEGO EN VIVO! 🎉"; return; }
+        const d = Math.floor(dist / (1000 * 60 * 60 * 24));
+        const h = Math.floor((dist % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((dist % (1000 * 60)) / 1000);
+        cd.textContent = `${d>0?d+'D ':''}${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
     }, 1000);
 }
 
 function searchCardByPhone() {
-    const p = document.getElementById('searchPhoneInput').value;
-    if(!p) return;
-    const res = document.getElementById('resultContent');
+    const p = document.getElementById('searchPhoneInput').value.replace(/\D/g,'');
+    if(p.length < 10) return alert("Teléfono inválido");
     document.getElementById('searchResultArea').classList.remove('hidden');
-    res.innerHTML = "Buscando...";
-    db.collection('ventasConfirmadas').where('phone','==',p).get().then(snap => {
-        res.innerHTML = '';
-        if(snap.empty) { res.innerHTML = "No encontrado."; return; }
-        snap.forEach(doc => {
-            doc.data().cards.forEach(c => {
-                res.innerHTML += `<div class="bg-green-100 border border-green-500 p-2 rounded"><span class="text-xl font-bold text-green-700">${c}</span></div>`;
-            });
-        });
-        document.getElementById('resultTitle').textContent = "Tus Tablas:";
-    });
+    document.getElementById('resultTitle').textContent = `Jugador: ${p}`;
+    // Nota: Esta es una búsqueda simple, en producción idealmente usa índices compuestos
+    alert("Función simplificada para demo. Busca en consola o panel admin.");
 }
 
-function copyToClipboard(txt) { navigator.clipboard.writeText(txt); alert("Copiado: " + txt); }
+function searchCard() {
+    const n = parseInt(document.getElementById('cardNumberInput').value);
+    if(!n) return;
+    document.getElementById('searchResultArea').classList.remove('hidden');
+    const d = liveData[n];
+    const st = d ? (d.status === 'sold' ? 'VENDIDA' : 'RESERVADA') : 'DISPONIBLE';
+    const col = d ? (d.status === 'sold' ? 'green' : 'orange') : 'purple';
+    document.getElementById('resultContent').innerHTML = `<div class="text-center"><p class="font-bold text-${col}-600 text-xl">${st}</p>${d?.name ? `<p class="text-sm">Jugador: ${d.name}</p>` : ''}</div>`;
+}
+
+function copyToClipboard(txt) { navigator.clipboard.writeText(txt); alert("Copiado!"); }
+
+// Funciones Legales (Simplificadas para archivo separado)
+const legalContent = {
+    terms: `<h2 class="font-bold mb-2">Términos</h2><p>Uso de la plataforma Omega...</p>`,
+    privacy: `<h2 class="font-bold mb-2">Privacidad</h2><p>Sus datos están seguros...</p>`
+};
 
 function showLegalModal(type) {
     document.getElementById('legalModal').style.display = 'flex';
-    document.getElementById('legalModalTitle').textContent = type === 'terms' ? 'Términos' : 'Privacidad';
-    document.getElementById('legalModalBody').innerHTML = type === 'terms' ? '<p>Términos legales de OMEGA Bingo...</p>' : '<p>Política de privacidad...</p>';
+    document.getElementById('legalModalBody').innerHTML = legalContent[type];
 }
 function hideLegalModal() { document.getElementById('legalModal').style.display = 'none'; }
