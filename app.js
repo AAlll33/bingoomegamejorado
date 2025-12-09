@@ -1,3 +1,86 @@
+// ======================================
+// Funcionalidad del Carrusel
+// ======================================
+
+const carouselTrack = document.getElementById('carouselTrack');
+const carouselDots = document.getElementById('carouselDots');
+let currentSlide = 0;
+let autoSlideInterval;
+
+// Obtener la cantidad de slides
+const slides = carouselTrack ? carouselTrack.children : [];
+const totalSlides = slides.length;
+
+if (totalSlides > 0 && carouselTrack) {
+    // 1. Inicializar los puntos (dots)
+    for (let i = 0; i < totalSlides; i++) {
+        const dot = document.createElement('div');
+        dot.classList.add('w-2', 'h-2', 'rounded-full', 'bg-white/50', 'cursor-pointer', 'transition');
+        dot.setAttribute('data-slide', i);
+        dot.onclick = () => goToSlide(i);
+        carouselDots.appendChild(dot);
+    }
+    
+    // 2. Función para mover el carrusel
+    function updateCarousel() {
+        if (!carouselTrack) return;
+        const offset = currentSlide * -100;
+        carouselTrack.style.transform = `translateX(${offset}%)`;
+        
+        // Actualizar el estado de los puntos
+        const dots = carouselDots.children;
+        for (let i = 0; i < dots.length; i++) {
+            dots[i].classList.remove('bg-yellow-400');
+            dots[i].classList.add('bg-white/50');
+        }
+        if (dots[currentSlide]) {
+            dots[currentSlide].classList.remove('bg-white/50');
+            dots[currentSlide].classList.add('bg-yellow-400');
+        }
+    }
+
+    // 3. Función de navegación manual
+    window.moveCarousel = function(direction) {
+        currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
+        updateCarousel();
+        // Reiniciar el temporizador al interactuar
+        resetAutoSlide();
+    }
+    
+    // 4. Función de navegación a un slide específico
+    function goToSlide(index) {
+        currentSlide = index;
+        updateCarousel();
+        resetAutoSlide();
+    }
+
+    // 5. Inicializar el carrusel automático
+    function startAutoSlide() {
+        autoSlideInterval = setInterval(() => {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            updateCarousel();
+        }, 5000); // 5 segundos por slide
+    }
+
+    // 6. Reiniciar el temporizador
+    function resetAutoSlide() {
+        clearInterval(autoSlideInterval);
+        startAutoSlide();
+    }
+    
+    // Iniciar al cargar la página
+    updateCarousel();
+    startAutoSlide();
+}
+
+
+// ======================================
+// Otras funciones de app.js (Mantenidas)
+// ======================================
+// ... (Aquí iría el resto de tu código app.js, como searchCardByPhone, showCardSelectionModal, etc.)
+// ... 
+
+
 // 🚨 CONFIGURACIÓN FIREBASE OMEGA 🚨
 const firebaseConfig = {
     apiKey: "AIzaSyCwrGuhYZkfnH-Yva8CwaEMfEYhzCByrRA",
